@@ -22,6 +22,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/leads").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/cars").hasRole("ADMIN")
                         .requestMatchers(
                                 "/swagger-ui.html",

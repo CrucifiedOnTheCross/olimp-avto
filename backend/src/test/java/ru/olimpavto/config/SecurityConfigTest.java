@@ -68,6 +68,20 @@ class SecurityConfigTest {
     }
 
     @Test
+    void leadListRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/api/leads"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void leadListAllowsAdminBasicAuth() throws Exception {
+        when(leadsApiDelegate.listLeads()).thenReturn(org.springframework.http.ResponseEntity.ok(java.util.List.of()));
+
+        mockMvc.perform(get("/api/leads").with(httpBasic("admin", "admin123")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void catalogCreateRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/api/cars")
                         .contentType(MediaType.APPLICATION_JSON)

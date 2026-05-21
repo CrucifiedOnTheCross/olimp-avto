@@ -13,6 +13,21 @@ tags:
     description: Manually managed catalog data
 paths:
   /api/leads:
+    get:
+      tags: [leads]
+      operationId: listLeads
+      summary: List saved consultation requests from database
+      responses:
+        '200':
+          description: Saved leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeadResponse'
+        '401':
+          description: Authentication required
     post:
       tags: [leads]
       operationId: sendLead
@@ -245,6 +260,18 @@ components:
           maxLength: 1000
         policyAccepted:
           type: boolean
+    LeadResponse:
+      allOf:
+        - $ref: '#/components/schemas/ConsultationRequest'
+        - type: object
+          required: [id, createdAt]
+          properties:
+            id:
+              type: integer
+              format: int64
+            createdAt:
+              type: string
+              format: date-time
     CarRequest:
       type: object
       required: [title, country, price, year, description]
