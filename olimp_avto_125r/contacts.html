@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты — Олимп Авто</title>
+    <link rel="icon" href="images/logo2.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<input type="checkbox" id="mobileMenuToggle" class="mobile-menu-toggle">
+
+<header class="header">
+    <div class="container nav">
+        <a href="mainveb.html" class="logo">
+            <img src="images/logo2.png" alt="Олимп Авто">
+            <div class="logo-text">
+                <span class="logo-title">Олимп <span>Авто</span></span>
+                <span class="logo-subtitle">Авто со всего мира</span>
+            </div>
+        </a>
+
+        <nav class="menu">
+            <a href="about.html">О нас</a>
+            <a href="contacts.html">Контакты</a>
+            <a href="catalog.html">Каталог</a>
+        </nav>
+
+        <button class="nav-btn open-modal">Рассчитать</button>
+        <label for="mobileMenuToggle" class="burger">☰</label>
+    </div>
+</header>
+
+<div class="mobile-menu">
+    <label for="mobileMenuToggle" class="close-menu">×</label>
+
+    <div class="mobile-header">
+        <img src="images/logo2.png" alt="Олимп Авто">
+        <div>
+            <div class="mobile-title">Олимп <span>Авто</span></div>
+            <div class="mobile-subtitle">Авто со всего мира</div>
+        </div>
+    </div>
+
+    <nav class="mobile-links">
+        <a href="mainveb.html">О нас</a>
+        <a href="about.html">О нас</a>
+        <a href="contacts.html">Контакты</a>
+        <a href="catalog.html">Каталог</a>
+    </nav>
+
+    <button class="mobile-btn open-modal">Рассчитать</button>
+</div>
+
+<main class="contacts-page">
+
+    <section class="contacts-hero">
+        <div class="container">
+            <span>Контакты</span>
+            <h1>Свяжитесь с <span>Олимп Авто</span></h1>
+            <p>Ответим на вопросы, рассчитаем стоимость и поможем подобрать автомобиль под ваш бюджет.</p>
+        </div>
+    </section>
+
+    <section class="contacts-section">
+        <div class="container contacts-grid">
+
+            <div class="contacts-card">
+                <h2>Наш офис</h2>
+
+                <div class="contact-item">
+                    <b>Адрес</b>
+                    <p>Владивосток, Набережная 10,<br>БЦ “Azimut”, офис 109</p>
+                </div>
+
+                <div class="contact-item">
+                    <b>Телефон</b>
+                    <a href="tel:+79147034272">+7 914 703-42-72</a>
+                </div>
+
+                <div class="contact-item">
+                    <b>Email</b>
+                    <a href="mailto:olimpautovl125@gmail.com">olimpautovl125@gmail.com</a>
+                </div>
+
+                <div class="contact-item">
+                    <b>График</b>
+                    <p>Пн–Пт: 10:00–18:00<br>Сб–Вс: по договорённости</p>
+                </div>
+
+                <div class="contacts-actions">
+                    <a href="tel:+79147034272">Позвонить</a>
+                    <button class="open-modal">Оставить заявку</button>
+                </div>
+            </div>
+
+            <div class="contacts-map">
+                <iframe
+                    src="https://yandex.ru/map-widget/v1/?ll=131.902778%2C43.119162&z=16"
+                    loading="lazy">
+                </iframe>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<div class="calc-modal" id="calcModal">
+    <div class="calc-box">
+        <button class="calc-close" id="calcClose">×</button>
+
+        <h2>Бесплатная консультация</h2>
+        <p>Оставьте контакты — мы перезвоним в течение 15 минут</p>
+
+        <form class="calc-form">
+            <input type="text" name="name" placeholder="Ваше имя" minlength="2" maxlength="120" required>
+            <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" pattern="\+?[0-9\s()\-]{10,20}" required>
+            <textarea name="comment" placeholder="Комментарий (необязательно)" maxlength="1000"></textarea>
+
+            <label class="calc-policy">
+                <input type="checkbox" name="policyAccepted" required>
+                <span>Я согласен на обработку персональных данных</span>
+            </label>
+
+            <button class="calc-submit">Отправить заявку</button>
+        </form>
+    </div>
+</div>
+
+<script src="scripts.js"></script>
+
+<footer class="footer">
+    <div class="container">
+
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="#" class="footer-logo">
+                    <img src="images/logo2.png" alt="Олимп Авто">
+                    <div>
+                        <strong>Олимп <span>Авто</span></strong>
+                        <p>Авто со всего мира</p>
+                    </div>
+                </a>
+
+                <p class="footer-text">
+                    Подбор, проверка, доставка и оформление автомобилей
+                    из Кореи, Китая, Японии, Европы и США.
+                </p>
+
+                <div class="footer-socials">
+                    <a href="#">TG</a>
+                    <a href="#">WA</a>
+                    <a href="#">VK</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Навигация</h4>
+                <a href="#">Главная</a>
+                <a href="#">Каталог</a>
+                <a href="#">Калькулятор</a>
+                <a href="#">Отзывы</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Авто</h4>
+                <a href="#">Авто из Кореи</a>
+                <a href="#">Авто из Китая</a>
+                <a href="#">Авто из Японии</a>
+                <a href="#">Скачать договор</a>
+            </div>
+
+            <div class="footer-contacts">
+                <h4>Контакты</h4>
+                <p>Владивосток, Набережная 10,<br>БЦ “Azimut”, офис 109</p>
+                <a href="tel:+79147034272" class="footer-phone">+7 914 703-42-72</a>
+                <a href="mailto:olimpautovl125@gmail.com">olimpautovl125@gmail.com</a>
+
+                <button class="footer-btn open-modal">Связаться с нами</button>
+            </div>
+        </div>
+
+        <div class="footer-review">
+            <div>
+                <span>Отзывы о нас</span>
+                <strong>5.0 ★</strong>
+            </div>
+
+            <div class="footer-platforms">
+                <a href="#">Яндекс</a>
+                <a href="#">2ГИС</a>
+                <a href="#">VL.ru</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 ООО “Олимп Авто”. Все права защищены.</p>
+            <div>
+                <a href="#">Политика конфиденциальности</a>
+                <a href="#">Обработка персональных данных</a>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

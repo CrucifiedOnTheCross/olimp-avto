@@ -1,0 +1,50 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: olimp-avto-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/olimp_avto
+      SPRING_DATASOURCE_USERNAME: olimp_avto
+      SPRING_DATASOURCE_PASSWORD: olimp_avto
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      APP_MAIL_FROM: noreply@olimp-avto.local
+      APP_MAIL_TO: olimpautovl125@gmail.com
+      APP_ADMIN_USERNAME: admin
+      APP_ADMIN_PASSWORD: admin123
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: olimp-avto-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: olimp_avto
+      POSTGRES_USER: olimp_avto
+      POSTGRES_PASSWORD: olimp_avto
+    volumes:
+      - olimp_avto_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U olimp_avto -d olimp_avto"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:v1.24
+    container_name: olimp-avto-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  olimp_avto_pgdata:

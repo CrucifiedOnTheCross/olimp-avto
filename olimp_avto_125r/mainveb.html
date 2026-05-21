@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олимп Авто</title>
+    <link rel="icon" href="images/logo2.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<input type="checkbox" id="mobileMenuToggle" class="mobile-menu-toggle">
+
+<!-- HEADER -->
+<header class="header">
+    <div class="container nav">
+
+        <a href="#" class="logo">
+            <img src="images/logo2.png" alt="Олимп Авто">
+            <div class="logo-text">
+                <span class="logo-title">Олимп <span>Авто</span></span>
+                <span class="logo-subtitle">Авто со всего мира</span>
+            </div>
+        </a>
+
+        <nav class="menu">
+            <a href="about.html">О нас</a>
+            <a href="contacts.html">Контакты</a>
+            <a href="catalog.html">Каталог</a>
+        </nav>
+
+        <button class="nav-btn open-modal">Рассчитать</button>
+
+        <!-- БУРГЕР -->
+        <label for="mobileMenuToggle" class="burger">☰</label>
+
+    </div>
+</header>
+
+<!-- МОБИЛЬНОЕ МЕНЮ -->
+<div class="mobile-menu">
+
+    <label for="mobileMenuToggle" class="close-menu">×</label>
+
+    <div class="mobile-header">
+        <img src="images/logo2.png" alt="">
+        <div>
+            <div class="mobile-title">Олимп <span>Авто</span></div>
+            <div class="mobile-subtitle">Авто со всего мира</div>
+        </div>
+    </div>
+
+    <nav class="mobile-links">
+        <a href="about.html">О нас</a>
+        <a href="contacts.html">Контакты</a>
+        <a href="catalog.html">Каталог</a>
+    </nav>
+
+    <button class="mobile-btn open-modal">Рассчитать</button>
+
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content">
+        <div class="hero-left">
+
+            <span class="hero-label">Премиальный подбор автомобилей</span>
+
+            <h1 class="hero-title reveal">
+                Подберем авто<br>
+                <span>с лучшим состоянием</span><br>
+                со всего мира
+            </h1>
+
+            <p class="hero-subtitle reveal">
+                Подбор, проверка, доставка и оформление автомобилей
+                из Кореи, Японии, Китая, Европы и США.
+            </p>
+
+            <div class="hero-buttons reveal">
+                <button class="hero-btn open-modal">Рассчитать</button>
+            </div>
+
+            <div class="hero-features reveal">
+                <div class="hero-feature">
+                    <span class="hero-feature-icon">✦</span>
+                    <p>Полная проверка перед покупкой</p>
+                </div>
+
+                <div class="hero-feature">
+                    <span class="hero-feature-icon">⚡</span>
+                    <p>Доставка от 20 дней</p>
+                </div>
+
+                <div class="hero-feature">
+                    <span class="hero-feature-icon">✔</span>
+                    <p>Подбор под ваш бюджет</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- TICKER -->
+<section class="ticker">
+    <div class="ticker-track">
+        <div class="ticker-content">
+            <span><img src="images/logo2.png"> 12 000 привезённых авто</span>
+            <span><img src="images/logo2.png"> 325 городов доставки</span>
+            <span><img src="images/logo2.png"> Выгоднее до 50%</span>
+            <span><img src="images/logo2.png"> Доставка от 20 дней</span>
+            <span><img src="images/logo2.png"> 10 лет опыта</span>
+        </div>
+    </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust">
+    <div class="container">
+
+        <div class="trust-head">
+            <span>Доверие клиентов</span>
+            <h2>Отзывы наших клиентов</h2>
+            <p>
+                Истории клиентов, которые уже получили свои автомобили
+            </p>
+        </div>
+
+        <div class="trust-summary">
+
+            <div>
+                <strong>120+</strong>
+                <span>отзывов клиентов</span>
+            </div>
+
+            <div>
+                <strong>5.0 ★</strong>
+                <span>средний рейтинг</span>
+            </div>
+
+            <div>
+                <strong>12 000+</strong>
+                <span>привезённых авто</span>
+            </div>
+
+        </div>
+
+        <div class="reviews-river">
+
+            <!-- REVIEW -->
+            <article class="review-river-card">
+
+                <div class="review-images">
+                    <img src="images/review-1.jpg" alt="">
+                </div>
+
+                <div class="stars">★★★★★</div>
+
+                <p class="review-text">
+                    Очень четко отработали. Всё прозрачно:
+                    показали варианты, объяснили расходы,
+                    помогли с выбором и держали на связи
+                    до самой выдачи автомобиля.
+                </p>
+
+                <div class="review-bottom">
+
+                    <div>
+                        <b>Игорь</b>
+                        <span>Toyota Camry · Корея</span>
+                    </div>
+
+                    <button
+                        class="read-review"
+
+                        data-name="Игорь"
+                        data-car="Toyota Camry · Корея"
+                        data-rating="★★★★★"
+
+                        data-image="images/review-1.jpg"
+
+                        data-text="
+                        Очень четко отработали. Всё прозрачно:
+                        показали варианты, объяснили расходы,
+                        помогли с выбором и держали на связи
+                        до самой выдачи автомобиля.
+
+                        Машина пришла в отличном состоянии,
+                        документы оформили быстро, постоянно
+                        присылали фото и видео отчёты.
+                        ">
+                        Читать полностью
+                    </button>
+
+                </div>
+
+            </article>
+
+            <!-- REVIEW -->
+            <article class="review-river-card">
+
+                <div class="review-images">
+                    <img src="images/review-2.jpg" alt="">
+                </div>
+
+                <div class="stars">★★★★★</div>
+
+                <p class="review-text">
+                    Подобрали авто быстрее, чем ожидала.
+                    Отдельно понравилось, что сразу объяснили
+                    все платежи и не было сюрпризов.
+                </p>
+
+                <div class="review-bottom">
+
+                    <div>
+                        <b>Анна</b>
+                        <span>Honda Vezel · Япония</span>
+                    </div>
+
+                    <button
+                        class="read-review"
+
+                        data-name="Анна"
+                        data-car="Honda Vezel · Япония"
+                        data-rating="★★★★★"
+
+                        data-image="images/review-2.jpg"
+
+                        data-text="
+                        Подобрали авто быстрее, чем ожидала.
+                        Сразу объяснили все платежи и не было
+                        никаких скрытых расходов.
+
+                        Машину проверили, прислали фото,
+                        помогли с документами и сопровождали
+                        на каждом этапе доставки.
+                        ">
+                        Читать полностью
+                    </button>
+
+                </div>
+
+            </article>
+
+            <!-- REVIEW -->
+            <article class="review-river-card">
+
+                <div class="review-images">
+                    <img src="images/review-3.jpg" alt="">
+                </div>
+
+                <div class="stars">★★★★★</div>
+
+                <p class="review-text">
+                    Лучший опыт покупки авто. Не пришлось
+                    самому разбираться в аукционах,
+                    доставке и документах.
+                </p>
+
+                <div class="review-bottom">
+
+                    <div>
+                        <b>Кирилл</b>
+                        <span>Geely Monjaro · Китай</span>
+                    </div>
+
+                    <button
+                        class="read-review"
+
+                        data-name="Кирилл"
+                        data-car="Geely Monjaro · Китай"
+                        data-rating="★★★★★"
+
+                        data-image="images/review-3.jpg"
+
+                        data-text="
+                        Лучший опыт покупки авто.
+                        Не пришлось самому разбираться
+                        в аукционах, доставке и документах.
+
+                        Всё сделали под ключ, всегда были
+                        на связи и присылали обновления
+                        по каждому этапу.
+                        ">
+                        Читать полностью
+                    </button>
+
+                </div>
+
+            </article>
+
+        </div>
+
+        <div class="trust-action">
+            <button class="trust-btn open-review">
+                Оставить отзыв
+            </button>
+        </div>
+
+    </div>
+</section>
+
+<!-- FULL REVIEW MODAL -->
+<div class="full-review-modal" id="fullReviewModal">
+
+    <div class="full-review-box">
+
+        <button
+            class="full-review-close"
+            id="fullReviewClose">
+            ×
+        </button>
+
+        <img
+            id="fullReviewImage"
+            src=""
+            alt="">
+
+        <div
+            class="full-review-rating"
+            id="fullReviewRating">
+        </div>
+
+        <h3 id="fullReviewName"></h3>
+
+        <span id="fullReviewCar"></span>
+
+        <p id="fullReviewText"></p>
+
+    </div>
+
+</div>
+
+
+<!-- МОДАЛКА РАСЧЁТА -->
+<div class="calc-modal" id="calcModal">
+    <div class="calc-box">
+
+        <button class="calc-close" id="calcClose">×</button>
+
+        <h2>Бесплатная консультация</h2>
+        <p>Оставьте контакты — мы перезвоним в течение 15 минут</p>
+
+        <form class="calc-form">
+            <input type="text" name="name" placeholder="Ваше имя" minlength="2" maxlength="120" required>
+            <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" pattern="\+?[0-9\s()\-]{10,20}" required>
+            <textarea name="comment" placeholder="Комментарий (необязательно)" maxlength="1000"></textarea>
+
+            <label class="calc-policy">
+                <input type="checkbox" name="policyAccepted" required>
+                <span>Я согласен на обработку персональных данных</span>
+            </label>
+
+            <button class="calc-submit">Отправить заявку</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- МОДАЛКА ОТЗЫВА -->
+<div class="review-modal" id="reviewModal">
+
+    <div class="review-box">
+
+        <button
+            class="review-close"
+            id="reviewClose">
+            ×
+        </button>
+
+        <h2>Оставить отзыв</h2>
+
+        <form class="review-form">
+
+            <label>Оценка</label>
+
+            <div class="rating-stars">
+
+                <input
+                    type="radio"
+                    name="rating"
+                    id="star5"
+                    value="5"
+                    checked>
+
+                <label for="star5">★</label>
+
+                <input
+                    type="radio"
+                    name="rating"
+                    id="star4"
+                    value="4">
+
+                <label for="star4">★</label>
+
+                <input
+                    type="radio"
+                    name="rating"
+                    id="star3"
+                    value="3">
+
+                <label for="star3">★</label>
+
+                <input
+                    type="radio"
+                    name="rating"
+                    id="star2"
+                    value="2">
+
+                <label for="star2">★</label>
+
+                <input
+                    type="radio"
+                    name="rating"
+                    id="star1"
+                    value="1">
+
+                <label for="star1">★</label>
+
+            </div>
+
+            <label>Текст отзыва</label>
+
+            <textarea
+                name="text"
+                placeholder="Расскажите о вашем опыте..."
+                minlength="10"
+                maxlength="2000"
+                required></textarea>
+
+            <label>Ваше имя</label>
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Иван Иванов"
+                minlength="2"
+                maxlength="120"
+                required>
+
+            <div class="review-row">
+
+                <input
+                    type="text"
+                    name="carModel"
+                    placeholder="Toyota Camry"
+                    minlength="2"
+                    maxlength="120"
+                    required>
+
+                <select name="country" required>
+                    <option value="" disabled selected>Страна</option>
+                    <option value="Корея">Корея</option>
+                    <option value="Япония">Япония</option>
+                    <option value="Китай">Китай</option>
+                    <option value="США">США</option>
+                </select>
+
+            </div>
+
+            <!-- PHOTO UPLOAD -->
+
+            <label>Фотографии автомобиля</label>
+
+            <div class="review-upload">
+
+                <input
+                    type="file"
+                    name="photos"
+                    id="reviewPhotos"
+                    accept="image/*"
+                    multiple>
+
+                <span>
+                    Загрузить фотографии
+                </span>
+
+                <small>
+                    Максимум 5 фотографий
+                </small>
+
+            </div>
+
+            <div
+                class="review-preview"
+                id="reviewPreview">
+            </div>
+
+            <!-- SUBMIT -->
+
+            <button class="review-submit">
+                Отправить отзыв
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<section class="calculator" id="calculator">
+    <div class="container">
+
+        <div class="calc-head">
+            <span>Калькулятор</span>
+
+            <h2>
+                Рассчитайте <span>стоимость</span>
+            </h2>
+
+            <p>
+                Узнайте примерную стоимость автомобиля под ключ
+            </p>
+        </div>
+
+        <div class="calc-wrap">
+
+            <!-- LEFT -->
+            <div class="calc-panel">
+
+                <h3>Быстрый расчёт</h3>
+
+
+
+                <!-- COUNTRY -->
+<!-- KOREA -->
+<button
+    class="country active"
+    data-country="korea">
+
+    <img
+        class="flag-svg"
+        src="https://hatscripts.github.io/circle-flags/flags/kr.svg"
+        alt="Корея">
+
+    <span>Корея</span>
+
+</button>
+
+<!-- JAPAN -->
+<button
+    class="country"
+    data-country="japan">
+
+    <img
+        class="flag-svg"
+        src="https://hatscripts.github.io/circle-flags/flags/jp.svg"
+        alt="Япония">
+
+    <span>Япония</span>
+
+</button>
+
+<!-- CHINA -->
+<button
+    class="country"
+    data-country="china">
+
+    <img
+        class="flag-svg"
+        src="https://hatscripts.github.io/circle-flags/flags/cn.svg"
+        alt="Китай">
+
+    <span>Китай</span>
+
+</button>
+
+                <!-- PRICE -->
+                <div class="calc-field">
+
+                    <label>
+                        Стоимость автомобиля, ₽
+                    </label>
+
+                    <input
+                        type="number"
+                        id="carPrice"
+                        value="1500000"
+                        min="100000"
+                        step="50000">
+
+                </div>
+
+                <!-- PRESETS -->
+                <div class="calc-presets">
+
+                    <button data-price="1000000">
+                        1 000 000 ₽
+                    </button>
+
+                    <button data-price="1500000">
+                        1 500 000 ₽
+                    </button>
+
+                    <button data-price="2500000">
+                        2 500 000 ₽
+                    </button>
+
+                    <button data-price="4000000">
+                        4 000 000 ₽
+                    </button>
+
+                    <button data-price="6000000">
+                        6 000 000 ₽
+                    </button>
+
+                    <button data-price="9000000">
+                        9 000 000 ₽
+                    </button>
+
+                </div>
+            <div class="calc-note">
+                * Расчёт для легкового авто, бензин, 2.0л, 3-5 лет, физлицо
+            </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="calc-result">
+
+                <h3>Результат расчёта</h3>
+
+                <p>
+                    Примерная стоимость под ключ
+                </p>
+
+                <div class="result-price">
+                    <span id="totalPrice">0</span> ₽
+                </div>
+
+                <div class="result-list">
+
+                    <div>
+                        <span>Стоимость авто</span>
+                        <b id="carRub">0 ₽</b>
+                    </div>
+
+                    <div>
+                        <span>Таможенные платежи</span>
+                        <b id="customs">0 ₽</b>
+                    </div>
+
+                    <div>
+                        <span>Доставка</span>
+                        <b id="delivery">0 ₽</b>
+                    </div>
+
+                    <div>
+                        <span>Услуги компании</span>
+                        <b id="service">0 ₽</b>
+                    </div>
+
+                </div>
+
+                <button class="calc-main-btn open-modal">
+                    Получить точный расчёт
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- BENEFITS -->
+        <div class="calc-benefits">
+
+            <div>
+                ✓ Без скрытых платежей
+            </div>
+
+            <div>
+                ✓ Фиксированная цена
+            </div>
+
+            <div>
+                ✓ Все расходы включены
+            </div>
+
+            <div>
+                ✓ Договор с гарантиями
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a href="#" class="footer-logo">
+                    <img src="images/logo2.png" alt="Олимп Авто">
+                    <div>
+                        <strong>Олимп <span>Авто</span></strong>
+                        <p>Авто со всего мира</p>
+                    </div>
+                </a>
+
+                <p class="footer-text">
+                    Подбор, проверка, доставка и оформление автомобилей
+                    из Кореи, Китая, Японии, Европы и США.
+                </p>
+
+                <div class="footer-socials">
+                    <a href="#">TG</a>
+                    <a href="#">WA</a>
+                    <a href="#">VK</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Навигация</h4>
+                <a href="#">Главная</a>
+                <a href="#">Каталог</a>
+                <a href="#">Калькулятор</a>
+                <a href="#">Отзывы</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Авто</h4>
+                <a href="#">Авто из Кореи</a>
+                <a href="#">Авто из Китая</a>
+                <a href="#">Авто из Японии</a>
+                <a href="#">Скачать договор</a>
+            </div>
+
+            <div class="footer-contacts">
+                <h4>Контакты</h4>
+                <p>Владивосток, Набережная 10,<br>БЦ “Azimut”, офис 109</p>
+                <a href="tel:+79147034272" class="footer-phone">+7 914 703-42-72</a>
+                <a href="mailto:olimpautovl125@gmail.com">olimpautovl125@gmail.com</a>
+
+                <button class="footer-btn open-modal">Связаться с нами</button>
+            </div>
+        </div>
+
+        <div class="footer-review">
+            <div>
+                <span>Отзывы о нас</span>
+                <strong>5.0 ★</strong>
+            </div>
+
+            <div class="footer-platforms">
+                <a href="#">Яндекс</a>
+                <a href="#">2ГИС</a>
+                <a href="#">VL.ru</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 ООО “Олимп Авто”. Все права защищены.</p>
+            <div>
+                <a href="#">Политика конфиденциальности</a>
+                <a href="#">Обработка персональных данных</a>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+<script src="scripts.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: Olimp Avto API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: leads
+    description: Customer lead forms
+  - name: reviews
+    description: Customer review forms
+  - name: cars
+    description: Manually managed catalog data
+paths:
+  /api/leads:
+    post:
+      tags: [leads]
+      operationId: sendLead
+      summary: Send consultation request to email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/reviews:
+    post:
+      tags: [reviews]
+      operationId: sendReview
+      summary: Send review with photos to email
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [rating, text, name, carModel, country]
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                text:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                name:
+                  type: string
+                  minLength: 2
+                  maxLength: 120
+                carModel:
+                  type: string
+                  minLength: 2
+                  maxLength: 120
+                country:
+                  type: string
+                  enum: [Корея, Япония, Китай, США]
+                photos:
+                  type: array
+                  maxItems: 5
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/cars:
+    get:
+      tags: [cars]
+      operationId: listCars
+      summary: List catalog cars from database
+      responses:
+        '200':
+          description: Cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarResponse'
+    post:
+      tags: [cars]
+      operationId: createCar
+      summary: Manually add catalog car to database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/cars/{id}:
+    get:
+      tags: [cars]
+      operationId: getCar
+      summary: Get one catalog car
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Car
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ConsultationRequest:
+      type: object
+      required: [name, phone, policyAccepted]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          pattern: '^\+?[0-9\s()\-]{10,20}$'
+        comment:
+          type: string
+          maxLength: 1000
+        policyAccepted:
+          type: boolean
+    CarRequest:
+      type: object
+      required: [title, country, price, year, description]
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 160
+        country:
+          type: string
+          minLength: 2
+          maxLength: 80
+        price:
+          type: integer
+          format: int64
+          minimum: 1
+        year:
+          type: integer
+          minimum: 1950
+          maximum: 2100
+        engine:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        imageUrl:
+          type: string
+          maxLength: 500
+    CarResponse:
+      allOf:
+        - $ref: '#/components/schemas/CarRequest'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+    FormResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string

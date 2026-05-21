@@ -1,0 +1,13 @@
+.vscode/
+*.log
+
+backend/.gradle/
+backend/build/
+backend/out/
+backend/*.log
+backend/.idea/
+backend/*.iml
+
+__pycache__/
+.DS_Store
+Thumbs.db

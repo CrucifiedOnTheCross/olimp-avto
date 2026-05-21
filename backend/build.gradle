@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.openapi.generator' version '7.13.0'
+}
+
+group = 'ru.olimpavto'
+version = '0.0.1-SNAPSHOT'
+
+springBoot {
+    mainClass = 'ru.olimpavto.OlimpAvtoApplication'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.30'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+    runtimeOnly 'org.postgresql:postgresql'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec = "$rootDir/src/main/resources/openapi.yaml"
+    outputDir = "$buildDir/generated/openapi"
+    apiPackage = 'ru.olimpavto.api'
+    modelPackage = 'ru.olimpavto.dto'
+    configOptions = [
+            dateLibrary     : 'java8',
+            delegatePattern : 'true',
+            interfaceOnly   : 'false',
+            openApiNullable: 'false',
+            useBeanValidation: 'true',
+            useSpringBoot3  : 'true',
+            useTags         : 'true'
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated/openapi/src/main/java"
+        }
+    }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+    dependsOn tasks.named('test')
+}
+
+tasks.named('jar') {
+    dependsOn tasks.named('test')
+}
