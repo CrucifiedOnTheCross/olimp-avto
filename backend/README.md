@@ -9,6 +9,7 @@ Backend на Spring Boot для статического фронта Olimp Avto
 - Валидация форм на фронте и на backend
 - Отправка формы консультации на почту: `POST /api/leads`
 - Отправка формы отзыва на почту с фотографиями: `POST /api/reviews`
+- Модерация отзывов: администратор принимает или отклоняет отзыв по ссылке из письма
 - Таблица каталога в PostgreSQL для ручного заполнения
 - API каталога: `GET /api/cars`, `GET /api/cars/{id}`, `POST /api/cars`
 - Basic Auth для административных эндпоинтов и Swagger
@@ -16,7 +17,7 @@ Backend на Spring Boot для статического фронта Olimp Avto
 
 ## Быстрый запуск
 
-Запустить backend, PostgreSQL и локальный тестовый SMTP:
+Запустить frontend, backend, PostgreSQL и локальный тестовый SMTP:
 
 ```powershell
 cd C:\Users\tooor\Downloads\avto_project\backend
@@ -26,22 +27,41 @@ docker compose up -d --build
 После запуска:
 
 ```text
+Сайт:       http://localhost
 Backend:    http://localhost:8080
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI: http://localhost/swagger-ui.html
 Mailpit:    http://localhost:8025
 ```
 
-Запуск фронта:
+Frontend лежит в папке:
+
+```text
+C:\Users\tooor\Downloads\avto_project\frontend
+```
+
+В Docker frontend раздаётся через nginx. Nginx также проксирует `/api`, `/swagger-ui` и `/v3/api-docs` на backend.
+
+Если нужно запустить frontend без Docker:
 
 ```powershell
-cd C:\Users\tooor\Downloads\avto_project\olimp_avto_125r
+cd C:\Users\tooor\Downloads\avto_project\frontend
 python -m http.server 8000
 ```
 
-Открыть сайт:
+При локальном запуске без Docker нужно указать адрес backend в `frontend/config.js`:
 
-```text
-http://localhost:8000/mainveb.html
+```js
+window.OLIMP_AVTO_CONFIG = {
+    apiBaseUrl: 'http://localhost:8080'
+};
+```
+
+При запуске через Docker значение должно быть пустым, потому что nginx проксирует `/api` на backend:
+
+```js
+window.OLIMP_AVTO_CONFIG = {
+    apiBaseUrl: ''
+};
 ```
 
 ## Авторизация
@@ -108,6 +128,37 @@ src/main/resources/application.yml
 | `APP_MAIL_TO` | адрес получателя заявок | `olimpautovl125@gmail.com` |
 | `APP_ADMIN_USERNAME` | логин администратора | `admin` |
 | `APP_ADMIN_PASSWORD` | пароль администратора | `admin123` |
+| `APP_PUBLIC_BASE_URL` | публичный адрес backend для ссылок модерации в письмах | `http://localhost:8080` |
+
+## Модерация отзывов
+
+Когда пользователь отправляет отзыв на сайте:
+
+1. backend валидирует поля формы;
+2. отзыв сохраняется в PostgreSQL со статусом `PENDING`;
+3. владельцу бизнеса приходит письмо с текстом отзыва и фотографиями;
+4. в письме есть две ссылки: `Принять отзыв` и `Отклонить отзыв`;
+5. если администратор нажимает `Принять`, статус меняется на `APPROVED`;
+6. только отзывы со статусом `APPROVED` отдаются на сайт через `GET /api/reviews`;
+7. если администратор нажимает `Отклонить`, статус меняется на `REJECTED`, и отзыв не отображается на сайте.
+
+Ссылки модерации формируются на основе переменной:
+
+```text
+APP_PUBLIC_BASE_URL
+```
+
+Для локального запуска:
+
+```text
+APP_PUBLIC_BASE_URL=http://localhost:8080
+```
+
+Для production нужно указать реальный публичный адрес backend, например:
+
+```text
+APP_PUBLIC_BASE_URL=https://api.olimpavtovl.ru
+```
 
 ## Настройка SMTP
 
@@ -339,6 +390,12 @@ docker compose build backend
 ```
 
 В Docker-сборке тесты тоже выполняются перед упаковкой приложения.
+
+Сборка Docker-образа frontend:
+
+```powershell
+docker compose build frontend
+```
 
 ## Проверка API
 

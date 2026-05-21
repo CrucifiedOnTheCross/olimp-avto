@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.olimpavto.dto.ConsultationRequest;
+import ru.olimpavto.reviews.ReviewEntity;
 
 @Service
 @EnableConfigurationProperties(MailProperties.class)
@@ -61,6 +62,41 @@ public class MailService {
                 """.formatted(rating, name, carModel, country, text);
 
         sendMessage("Новый отзыв с сайта", body, photos == null ? List.of() : photos);
+    }
+
+    public void sendReviewModeration(
+            ReviewEntity review,
+            String approveUrl,
+            String rejectUrl,
+            List<MultipartFile> photos
+    ) {
+        String body = """
+                Новый отзыв ожидает модерации
+
+                Оценка: %d
+                Имя: %s
+                Автомобиль: %s
+                Страна: %s
+
+                Текст отзыва:
+                %s
+
+                Принять отзыв:
+                %s
+
+                Отклонить отзыв:
+                %s
+                """.formatted(
+                review.getRating(),
+                review.getName(),
+                review.getCarModel(),
+                review.getCountry(),
+                review.getText(),
+                approveUrl,
+                rejectUrl
+        );
+
+        sendMessage("Новый отзыв ожидает модерации", body, photos == null ? List.of() : photos);
     }
 
     private void sendMessage(String subject, String body, List<MultipartFile> attachments) {

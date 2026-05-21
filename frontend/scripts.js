@@ -1,8 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
 
-    const API_BASE = window.location.port === '8080'
-        ? ''
-        : 'http://localhost:8080';
+    const API_BASE = window.OLIMP_AVTO_CONFIG?.apiBaseUrl ?? '';
 
     function setFormMessage(form, message, type = 'success') {
         let messageBox = form.querySelector('.form-message');
@@ -140,6 +138,49 @@ window.addEventListener('DOMContentLoaded', () => {
             submitMultipartForm(form, '/api/reviews', new FormData(form));
         });
     });
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function stars(rating) {
+        return '★'.repeat(Number(rating) || 0);
+    }
+
+    async function loadApprovedReviews() {
+        const river = document.querySelector('.reviews-river');
+        if (!river) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/reviews`);
+            if (!response.ok) return;
+
+            const reviews = await response.json();
+            if (!Array.isArray(reviews) || reviews.length === 0) return;
+
+            river.innerHTML = reviews.map(review => `
+                <article class="review-river-card">
+                    <div class="stars">${escapeHtml(stars(review.rating))}</div>
+                    <p class="review-text">${escapeHtml(review.text)}</p>
+                    <div class="review-bottom">
+                        <div>
+                            <b>${escapeHtml(review.name)}</b>
+                            <span>${escapeHtml(review.carModel)} · ${escapeHtml(review.country)}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        } catch {
+            // Static fallback reviews stay visible when API is unavailable.
+        }
+    }
+
+    loadApprovedReviews();
 
     const reveals = document.querySelectorAll('.reveal');
 

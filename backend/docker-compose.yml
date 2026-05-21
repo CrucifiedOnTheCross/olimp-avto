@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: olimp-avto-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
   backend:
     build:
       context: .
@@ -16,6 +26,7 @@ services:
       APP_MAIL_TO: olimpautovl125@gmail.com
       APP_ADMIN_USERNAME: admin
       APP_ADMIN_PASSWORD: admin123
+      APP_PUBLIC_BASE_URL: http://localhost:8080
     depends_on:
       postgres:
         condition: service_healthy

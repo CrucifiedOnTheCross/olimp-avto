@@ -37,10 +37,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /api/reviews:
+    get:
+      tags: [reviews]
+      operationId: listApprovedReviews
+      summary: List approved reviews for site
+      responses:
+        '200':
+          description: Approved reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewResponse'
     post:
       tags: [reviews]
       operationId: sendReview
-      summary: Send review with photos to email
+      summary: Send review to moderation email
       requestBody:
         required: true
         content:
@@ -150,6 +163,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/reviews/{id}/approve:
+    get:
+      tags: [reviews]
+      operationId: approveReview
+      summary: Approve pending review by moderation token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 20
+      responses:
+        '200':
+          description: Approved
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/reviews/{id}/reject:
+    get:
+      tags: [reviews]
+      operationId: rejectReview
+      summary: Reject pending review by moderation token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 20
+      responses:
+        '200':
+          description: Rejected
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     ConsultationRequest:
@@ -207,6 +284,32 @@ components:
             id:
               type: integer
               format: int64
+    ReviewResponse:
+      type: object
+      required: [id, rating, text, name, carModel, country]
+      properties:
+        id:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        text:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        carModel:
+          type: string
+          minLength: 2
+          maxLength: 120
+        country:
+          type: string
+          enum: [Корея, Япония, Китай, США]
     FormResponse:
       type: object
       required: [message]
