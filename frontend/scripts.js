@@ -421,6 +421,53 @@ window.addEventListener('DOMContentLoaded', () => {
     const carModalPrice = document.getElementById('carModalPrice');
     const carModalText = document.getElementById('carModalText');
 
+    const catalogModeButtons = document.querySelectorAll('[data-catalog-mode]');
+    const catalogModePanels = document.querySelectorAll('[data-catalog-panel]');
+    const catalogCategoryButtons = document.querySelectorAll('.catalog-category');
+    const catalogCards = document.querySelectorAll('.catalog-car');
+
+    function setCatalogMode(mode) {
+        catalogModeButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.catalogMode === mode);
+        });
+        catalogModePanels.forEach(panel => {
+            panel.classList.toggle('active', panel.dataset.catalogPanel === mode);
+        });
+
+        if (mode === 'auction') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('mode', 'auction');
+            window.history.replaceState({}, '', url);
+        } else if (window.location.search.includes('mode=')) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('mode');
+            window.history.replaceState({}, '', url);
+        }
+    }
+
+    if (catalogModeButtons.length && catalogModePanels.length) {
+        catalogModeButtons.forEach(button => {
+            button.addEventListener('click', () => setCatalogMode(button.dataset.catalogMode || 'popular'));
+        });
+
+        const requestedMode = new URLSearchParams(window.location.search).get('mode');
+        setCatalogMode(requestedMode === 'auction' ? 'auction' : 'popular');
+    }
+
+    if (catalogCategoryButtons.length && catalogCards.length) {
+        catalogCategoryButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.dataset.filter || 'all';
+                catalogCategoryButtons.forEach(item => item.classList.remove('active'));
+                button.classList.add('active');
+                catalogCards.forEach(card => {
+                    const countries = card.dataset.country || '';
+                    card.hidden = filter !== 'all' && !countries.includes(filter);
+                });
+            });
+        });
+    }
+
     if (
         carModal &&
         carModalClose &&
@@ -560,7 +607,10 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_BASE}/api/auctions/search?${params.toString()}`);
             if (!response.ok) {
-                throw new Error(await parseApiMessage(response));
+                const message = await parseApiMessage(response);
+                throw new Error(message.includes('API-код')
+                    ? 'Аукционные лоты временно недоступны. Оставьте заявку, менеджер подберёт варианты вручную.'
+                    : message);
             }
             const result = await response.json();
             renderAuctionLots(Array.isArray(result.items) ? result.items : []);

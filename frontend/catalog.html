@@ -1,12 +1,9 @@
-Вот готовый `catalog.html` с шапкой, каталогом, модалкой и подвалом:
-
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог — Олимп Авто</title>
+    <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +13,6 @@
 
 <header class="header">
     <div class="container nav">
-
         <a href="mainveb.html" class="logo">
             <img src="images/logo2.png" alt="Олимп Авто">
             <div class="logo-text">
@@ -29,13 +25,11 @@
             <a href="about.html">О нас</a>
             <a href="contacts.html">Контакты</a>
             <a href="catalog.html">Каталог</a>
-            <a href="auctions.html">Аукционы</a>
+            <a href="catalog.html?mode=auction">Аукционы</a>
         </nav>
 
         <button class="nav-btn open-modal">Рассчитать</button>
-
         <label for="mobileMenuToggle" class="burger">☰</label>
-
     </div>
 </header>
 
@@ -55,194 +49,251 @@
         <a href="about.html">О нас</a>
         <a href="contacts.html">Контакты</a>
         <a href="catalog.html">Каталог</a>
-        <a href="auctions.html">Аукционы</a>
+        <a href="catalog.html?mode=auction">Аукционы</a>
     </nav>
 
     <button class="mobile-btn open-modal">Рассчитать</button>
 </div>
 
 <main class="catalog-page">
-
     <section class="catalog-hero">
         <div class="container">
             <span>Каталог автомобилей</span>
-            <h1>Подберите авто <span>под ваш бюджет</span></h1>
+            <h1>Подберите авто <span>из витрины или аукциона</span></h1>
             <p>
-                Популярные автомобили из Кореи, Японии и Китая.
-                Оставьте заявку — рассчитаем точную стоимость под ключ.
+                Популярные автомобили для быстрого расчета и поиск аукционных лотов
+                через backend без передачи ключей API в браузер.
             </p>
         </div>
     </section>
 
     <section class="catalog-section">
-        <div class="container catalog-layout">
-
-            <aside class="catalog-sidebar">
-                <h3>Каталог</h3>
-
-                <button class="catalog-category active" data-filter="all">Все</button>
-                <button class="catalog-category" data-filter="japan">Японские</button>
-                <button class="catalog-category" data-filter="korea">Корейские</button>
-                <button class="catalog-category" data-filter="china">Китайские</button>
-                <button class="catalog-category" data-filter="suv">Джип</button>
-                <button class="catalog-category" data-filter="minivan">Минивэн</button>
-                <button class="catalog-category" data-filter="hatchback">Хэтчбек</button>
-                <button class="catalog-category" data-filter="sedan">Седан</button>
-                <button class="catalog-category" data-filter="crossover">Кроссовер</button>
-                <button class="catalog-category" data-filter="wagon">Универсал</button>
-
-                <div class="catalog-filter-group">
-                    <h4>Бренд</h4>
-
-                    <label><input type="checkbox"> Toyota</label>
-                    <label><input type="checkbox"> Nissan</label>
-                    <label><input type="checkbox"> Honda</label>
-                    <label><input type="checkbox"> Hyundai</label>
-                    <label><input type="checkbox"> Kia</label>
-                    <label><input type="checkbox"> Geely</label>
-                </div>
-            </aside>
-
-            <div class="catalog-content">
-
-                <div class="catalog-top">
-                    <div class="catalog-search">
-                        <input type="text" placeholder="Поиск автомобиля">
-                        <button>⌕</button>
-                    </div>
-
-                    <select class="catalog-sort">
-                        <option>Порядок: по умолчанию</option>
-                        <option>Сначала дешевле</option>
-                        <option>Сначала дороже</option>
-                        <option>Сначала новые</option>
-                    </select>
-                </div>
-
-                <div class="catalog-grid">
-
-                    <article class="catalog-car" data-country="japan">
-                        <div class="catalog-car-img">
-                            <img src="images/car-1.jpg" alt="Nissan Juke">
-                            <span>Япония</span>
-                        </div>
-
-                        <div class="catalog-car-body">
-                            <h3>Nissan Juke</h3>
-                            <p>2015 · 1.5 л · бензин · 114 л.с.</p>
-                            <strong>1 050 000 ₽</strong>
-
-                            <button
-                                class="catalog-more"
-                                data-title="Nissan Juke"
-                                data-country="Япония"
-                                data-price="1 050 000 ₽"
-                                data-image="images/car-1.jpg"
-                                data-info="2015 · 1.5 л · бензин · 114 л.с."
-                                data-text="Компактный городской кроссовер из Японии. Экономичный двигатель, удобная посадка и хороший вариант для города.">
-                                Подробнее
-                            </button>
-                        </div>
-                    </article>
-
-                    <article class="catalog-car" data-country="japan">
-                        <div class="catalog-car-img">
-                            <img src="images/car-2.jpg" alt="Suzuki Solio">
-                            <span>Япония</span>
-                        </div>
-
-                        <div class="catalog-car-body">
-                            <h3>Suzuki Solio</h3>
-                            <p>2022 · 1.2 л · бензин · мягкий гибрид</p>
-                            <strong>1 250 000 ₽</strong>
-
-                            <button
-                                class="catalog-more"
-                                data-title="Suzuki Solio"
-                                data-country="Япония"
-                                data-price="1 250 000 ₽"
-                                data-image="images/car-2.jpg"
-                                data-info="2022 · 1.2 л · бензин · мягкий гибрид"
-                                data-text="Практичный компактный минивэн с удобным салоном, низким расходом и отличной обзорностью.">
-                                Подробнее
-                            </button>
-                        </div>
-                    </article>
-
-                    <article class="catalog-car" data-country="china">
-                        <div class="catalog-car-img">
-                            <img src="images/car-3.jpg" alt="Geely Monjaro">
-                            <span>Китай</span>
-                        </div>
-
-                        <div class="catalog-car-body">
-                            <h3>Geely Monjaro</h3>
-                            <p>2023 · 2.0 л · бензин · автомат</p>
-                            <strong>3 450 000 ₽</strong>
-
-                            <button
-                                class="catalog-more"
-                                data-title="Geely Monjaro"
-                                data-country="Китай"
-                                data-price="3 450 000 ₽"
-                                data-image="images/car-3.jpg"
-                                data-info="2023 · 2.0 л · бензин · автомат"
-                                data-text="Современный кроссовер с богатой комплектацией, мощным турбомотором и комфортным салоном.">
-                                Подробнее
-                            </button>
-                        </div>
-                    </article>
-
-                </div>
-
+        <div class="container">
+            <div class="catalog-mode-tabs" role="tablist" aria-label="Режим каталога">
+                <button class="catalog-mode-tab active" type="button" data-catalog-mode="popular">
+                    Популярные авто
+                </button>
+                <button class="catalog-mode-tab" type="button" data-catalog-mode="auction">
+                    Аукционы Японии
+                </button>
             </div>
 
+            <section class="catalog-mode-panel active" id="popularCatalogPanel" data-catalog-panel="popular">
+                <div class="catalog-layout">
+                    <aside class="catalog-sidebar">
+                        <h3>Витрина</h3>
+                        <button class="catalog-category active" data-filter="all">Все</button>
+                        <button class="catalog-category" data-filter="japan">Японские</button>
+                        <button class="catalog-category" data-filter="korea">Корейские</button>
+                        <button class="catalog-category" data-filter="china">Китайские</button>
+                        <button class="catalog-category" data-filter="crossover">Кроссоверы</button>
+                        <button class="catalog-category" data-filter="minivan">Минивэны</button>
+
+                        <div class="catalog-filter-group">
+                            <h4>Что дальше</h4>
+                            <p class="catalog-help">
+                                Выберите пример из витрины или перейдите во вкладку аукционов,
+                                чтобы найти живые лоты.
+                            </p>
+                        </div>
+                    </aside>
+
+                    <div class="catalog-content">
+                        <div class="catalog-top">
+                            <div>
+                                <span class="catalog-kicker">Быстрый старт</span>
+                                <h2>Популярные варианты</h2>
+                            </div>
+                            <button class="catalog-switch-link" type="button" data-catalog-mode="auction">
+                                Искать на аукционе
+                            </button>
+                        </div>
+
+                        <div class="catalog-grid">
+                            <article class="catalog-car" data-country="japan crossover">
+                                <div class="catalog-car-img">
+                                    <img src="images/car-hero.png" alt="Nissan Juke">
+                                    <span>Япония</span>
+                                </div>
+                                <div class="catalog-car-body">
+                                    <h3>Nissan Juke</h3>
+                                    <p>2015 · 1.5 л · бензин · городской кроссовер</p>
+                                    <strong>от 1 050 000 ₽</strong>
+                                    <button
+                                        class="catalog-more"
+                                        data-title="Nissan Juke"
+                                        data-country="Япония"
+                                        data-price="от 1 050 000 ₽"
+                                        data-image="images/car-hero.png"
+                                        data-info="2015 · 1.5 л · бензин · городской кроссовер"
+                                        data-text="Компактный вариант для города. Менеджер подберет живые лоты и рассчитает доставку под ключ.">
+                                        Подробнее
+                                    </button>
+                                </div>
+                            </article>
+
+                            <article class="catalog-car" data-country="japan minivan">
+                                <div class="catalog-car-img">
+                                    <img src="images/car-hero.png" alt="Suzuki Solio">
+                                    <span>Япония</span>
+                                </div>
+                                <div class="catalog-car-body">
+                                    <h3>Suzuki Solio</h3>
+                                    <p>2022 · 1.2 л · бензин · мягкий гибрид</p>
+                                    <strong>от 1 250 000 ₽</strong>
+                                    <button
+                                        class="catalog-more"
+                                        data-title="Suzuki Solio"
+                                        data-country="Япония"
+                                        data-price="от 1 250 000 ₽"
+                                        data-image="images/car-hero.png"
+                                        data-info="2022 · 1.2 л · бензин · мягкий гибрид"
+                                        data-text="Практичный минивэн с низким расходом. Можно искать похожие лоты на японских аукционах.">
+                                        Подробнее
+                                    </button>
+                                </div>
+                            </article>
+
+                            <article class="catalog-car" data-country="china crossover">
+                                <div class="catalog-car-img">
+                                    <img src="images/car-hero.png" alt="Geely Monjaro">
+                                    <span>Китай</span>
+                                </div>
+                                <div class="catalog-car-body">
+                                    <h3>Geely Monjaro</h3>
+                                    <p>2023 · 2.0 л · бензин · автомат</p>
+                                    <strong>от 3 450 000 ₽</strong>
+                                    <button
+                                        class="catalog-more"
+                                        data-title="Geely Monjaro"
+                                        data-country="Китай"
+                                        data-price="от 3 450 000 ₽"
+                                        data-image="images/car-hero.png"
+                                        data-info="2023 · 2.0 л · бензин · автомат"
+                                        data-text="Современный кроссовер с богатой комплектацией. Оставьте заявку для точного расчета.">
+                                        Подробнее
+                                    </button>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="catalog-mode-panel" id="auctionCatalogPanel" data-catalog-panel="auction">
+                <div class="auction-layout catalog-auction-layout">
+                    <form class="auction-search" id="auctionSearchForm">
+                        <h2>Поиск лотов</h2>
+                        <label>
+                            Быстрый поиск
+                            <input type="search" name="query" placeholder="Например, Toyota Prius">
+                        </label>
+                        <label>
+                            Марка
+                            <input type="text" name="manufacturer" placeholder="Toyota">
+                        </label>
+                        <label>
+                            Модель
+                            <input type="text" name="model" placeholder="Prius">
+                        </label>
+                        <div class="auction-search-row">
+                            <label>
+                                Год от
+                                <input type="number" name="yearFrom" min="1980" max="2100" placeholder="2018">
+                            </label>
+                            <label>
+                                Год до
+                                <input type="number" name="yearTo" min="1980" max="2100" placeholder="2026">
+                            </label>
+                        </div>
+                        <label>
+                            Пробег до, км
+                            <input type="number" name="maxMileage" min="1" placeholder="80000">
+                        </label>
+                        <button type="submit">Найти лоты</button>
+                        <p class="auction-note">
+                            Поиск идёт через наш backend: API-код поставщика не попадает в браузер.
+                        </p>
+                    </form>
+
+                    <div class="auction-results">
+                        <div class="auction-results-top">
+                            <div>
+                                <span>Аукционы Японии</span>
+                                <h2>Живые лоты</h2>
+                            </div>
+                            <button class="auction-refresh" id="auctionRefresh" type="button">Обновить</button>
+                        </div>
+
+                        <div class="auction-state" id="auctionState">
+                            Задайте параметры и запустите поиск.
+                        </div>
+
+                        <div class="auction-grid" id="auctionGrid"></div>
+                    </div>
+                </div>
+            </section>
         </div>
     </section>
-
 </main>
 
 <div class="car-modal" id="carModal">
     <div class="car-modal-box">
         <button class="car-modal-close" id="carModalClose">×</button>
-
         <div class="car-modal-img">
             <img id="carModalImage" src="" alt="">
         </div>
-
         <div class="car-modal-content">
             <span id="carModalCountry"></span>
             <h2 id="carModalTitle"></h2>
             <p id="carModalInfo"></p>
-
             <div class="car-modal-price" id="carModalPrice"></div>
-
             <p id="carModalText"></p>
-
-            <button class="calc-main-btn open-modal">
-                Получить расчёт
-            </button>
+            <button class="calc-main-btn open-modal">Получить расчёт</button>
         </div>
     </div>
+</div>
+
+<div class="auction-lead-modal" id="auctionLeadModal">
+    <form class="auction-lead-box" id="auctionLeadForm">
+        <button class="auction-lead-close" id="auctionLeadClose" type="button">×</button>
+        <span>Заявка по лоту</span>
+        <h2 id="auctionLeadTitle">Аукционный лот</h2>
+        <input type="hidden" name="lotId" id="auctionLeadLotId">
+        <input type="hidden" name="lotTitle" id="auctionLeadLotTitle">
+        <label>
+            Ваше имя
+            <input type="text" name="name" required minlength="2" maxlength="120">
+        </label>
+        <label>
+            Телефон
+            <input type="tel" name="phone" required pattern="^\+?[0-9\s()\-]{10,20}$">
+        </label>
+        <label>
+            Комментарий
+            <textarea name="comment" maxlength="1000" placeholder="Что важно уточнить по этому лоту"></textarea>
+        </label>
+        <label class="privacy-check">
+            <input type="checkbox" name="policyAccepted" required>
+            <span>Согласен на обработку персональных данных</span>
+        </label>
+        <button type="submit">Отправить заявку</button>
+    </form>
 </div>
 
 <div class="calc-modal" id="calcModal">
     <div class="calc-box">
         <button class="calc-close" id="calcClose">×</button>
-
         <h2>Бесплатная консультация</h2>
         <p>Оставьте контакты — мы перезвоним в течение 15 минут</p>
-
         <form class="calc-form">
             <input type="text" name="name" placeholder="Ваше имя" minlength="2" maxlength="120" required>
             <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" pattern="\+?[0-9\s()\-]{10,20}" required>
             <textarea name="comment" placeholder="Комментарий (необязательно)" maxlength="1000"></textarea>
-
             <label class="calc-policy">
                 <input type="checkbox" name="policyAccepted" required>
                 <span>Я согласен на обработку персональных данных</span>
             </label>
-
             <button class="calc-submit">Отправить заявку</button>
         </form>
     </div>
@@ -250,9 +301,7 @@
 
 <footer class="footer">
     <div class="container">
-
         <div class="footer-top">
-
             <div class="footer-brand">
                 <a href="mainveb.html" class="footer-logo">
                     <img src="images/logo2.png" alt="Олимп Авто">
@@ -261,12 +310,10 @@
                         <p>Авто со всего мира</p>
                     </div>
                 </a>
-
                 <p class="footer-text">
                     Подбор, проверка, доставка и оформление автомобилей
                     из Кореи, Китая, Японии, Европы и США.
                 </p>
-
                 <div class="footer-socials">
                     <a href="#">TG</a>
                     <a href="#">WA</a>
@@ -278,16 +325,16 @@
                 <h4>Навигация</h4>
                 <a href="mainveb.html">Главная</a>
                 <a href="catalog.html">Каталог</a>
-                <a href="mainveb.html#calculator">Калькулятор</a>
+                <a href="catalog.html?mode=auction">Аукционы</a>
                 <a href="mainveb.html#reviews">Отзывы</a>
             </div>
 
             <div class="footer-col">
                 <h4>Авто</h4>
-                <a href="#">Авто из Кореи</a>
-                <a href="#">Авто из Китая</a>
-                <a href="#">Авто из Японии</a>
-                <a href="#">Скачать договор</a>
+                <a href="catalog.html?mode=auction">Аукционы Японии</a>
+                <a href="catalog.html">Популярные авто</a>
+                <a href="contacts.html">Доставка</a>
+                <a href="about.html">О компании</a>
             </div>
 
             <div class="footer-contacts">
@@ -295,10 +342,8 @@
                 <p>Владивосток, Набережная 10,<br>БЦ “Azimut”, офис 109</p>
                 <a href="tel:+79147034272" class="footer-phone">+7 914 703-42-72</a>
                 <a href="mailto:olimpautovl125@gmail.com">olimpautovl125@gmail.com</a>
-
                 <button class="footer-btn open-modal">Связаться с нами</button>
             </div>
-
         </div>
 
         <div class="footer-review">
@@ -306,7 +351,6 @@
                 <span>Отзывы о нас</span>
                 <strong>5.0 ★</strong>
             </div>
-
             <div class="footer-platforms">
                 <a href="#">Яндекс</a>
                 <a href="#">2ГИС</a>
@@ -321,7 +365,6 @@
                 <a href="#">Обработка персональных данных</a>
             </div>
         </div>
-
     </div>
 </footer>
 
