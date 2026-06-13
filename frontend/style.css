@@ -2842,6 +2842,14 @@ body {
     cursor: pointer;
 }
 
+.catalog-filter-subtitle {
+    margin: 18px 0 10px;
+    color: #e0a236;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
 .catalog-help {
     margin: 0;
     color: rgba(255,255,255,0.6);
@@ -3377,6 +3385,7 @@ body {
 }
 
 .auction-search input,
+.auction-search select,
 .auction-lead-box input,
 .auction-lead-box textarea {
     width: 100%;
@@ -3397,10 +3406,28 @@ body {
 }
 
 .auction-search input:focus,
+.auction-search select:focus,
 .auction-lead-box input:focus,
 .auction-lead-box textarea:focus {
     outline: none;
     border-color: rgba(244, 177, 61, 0.78);
+}
+
+.auction-search select {
+    appearance: none;
+    background-image:
+        linear-gradient(135deg, rgba(60,8,10,0.66), rgba(10,5,6,0.94)),
+        linear-gradient(45deg, transparent 50%, #e0a236 50%),
+        linear-gradient(135deg, #e0a236 50%, transparent 50%);
+    background-position:
+        0 0,
+        calc(100% - 18px) 21px,
+        calc(100% - 12px) 21px;
+    background-size:
+        auto,
+        6px 6px,
+        6px 6px;
+    background-repeat: no-repeat;
 }
 
 .auction-search-row {

@@ -412,7 +412,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const carModal = document.getElementById('carModal');
     const carModalClose = document.getElementById('carModalClose');
-    const catalogMoreButtons = document.querySelectorAll('.catalog-more');
 
     const carModalImage = document.getElementById('carModalImage');
     const carModalCountry = document.getElementById('carModalCountry');
@@ -423,9 +422,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const catalogModeButtons = document.querySelectorAll('[data-catalog-mode]');
     const catalogModePanels = document.querySelectorAll('[data-catalog-panel]');
-    const catalogCategoryButtons = document.querySelectorAll('.catalog-category');
-    const catalogCards = document.querySelectorAll('.catalog-car');
+    const catalogFilterList = document.getElementById('catalogFilterList');
+    const catalogGrid = document.getElementById('catalogGrid');
     const catalogEmpty = document.getElementById('catalogEmpty');
+    let catalogCars = [];
+    let catalogFilter = { type: 'all', value: 'all' };
 
     function setCatalogMode(mode) {
         catalogModeButtons.forEach(button => {
@@ -455,26 +456,114 @@ window.addEventListener('DOMContentLoaded', () => {
         setCatalogMode(requestedMode === 'auction' ? 'auction' : 'popular');
     }
 
-    if (catalogCategoryButtons.length && catalogCards.length) {
-        catalogCategoryButtons.forEach(button => {
+    function carManufacturer(title) {
+        return String(title || '').trim().split(/\s+/)[0] || 'Другое';
+    }
+
+    function renderCatalogFilters(filters) {
+        if (!catalogFilterList) return;
+
+        const countries = Array.isArray(filters?.countries) ? filters.countries : [];
+        const manufacturers = Array.isArray(filters?.manufacturers) ? filters.manufacturers : [];
+        catalogFilterList.innerHTML = `
+            <button class="catalog-category active" data-filter-type="all" data-filter-value="all">Все</button>
+            ${countries.map(country => `
+                <button class="catalog-category" data-filter-type="country" data-filter-value="${escapeHtml(country)}">
+                    ${escapeHtml(country)}
+                </button>
+            `).join('')}
+            ${manufacturers.length ? `<div class="catalog-filter-subtitle">Марки в БД</div>` : ''}
+            ${manufacturers.map(manufacturer => `
+                <button class="catalog-category" data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
+                    ${escapeHtml(manufacturer)}
+                </button>
+            `).join('')}
+        `;
+
+        catalogFilterList.querySelectorAll('.catalog-category').forEach(button => {
             button.addEventListener('click', () => {
-                const filter = button.dataset.filter || 'all';
-                catalogCategoryButtons.forEach(item => item.classList.remove('active'));
+                catalogFilterList.querySelectorAll('.catalog-category').forEach(item => item.classList.remove('active'));
                 button.classList.add('active');
-                let visibleCount = 0;
-                catalogCards.forEach(card => {
-                    const countries = card.dataset.country || '';
-                    const visible = filter === 'all' || countries.includes(filter);
-                    card.hidden = !visible;
-                    if (visible) {
-                        visibleCount += 1;
-                    }
-                });
-                if (catalogEmpty) {
-                    catalogEmpty.hidden = visibleCount > 0;
-                }
+                catalogFilter = {
+                    type: button.dataset.filterType || 'all',
+                    value: button.dataset.filterValue || 'all'
+                };
+                renderCatalogCars(catalogCars);
             });
         });
+    }
+
+    function renderCatalogCars(cars) {
+        if (!catalogGrid) return;
+
+        const filtered = cars.filter(car => {
+            if (catalogFilter.type === 'country') {
+                return car.country === catalogFilter.value;
+            }
+            if (catalogFilter.type === 'manufacturer') {
+                return carManufacturer(car.title) === catalogFilter.value;
+            }
+            return true;
+        });
+
+        catalogGrid.innerHTML = filtered.map(car => {
+            const image = car.imageUrl && !car.imageUrl.includes('car-')
+                ? car.imageUrl
+                : 'images/car-hero.png';
+            const info = [car.year, car.engine].filter(Boolean).join(' · ');
+            return `
+                <article class="catalog-car" data-country="${escapeHtml(car.country || '')}">
+                    <div class="catalog-car-img">
+                        <img src="${escapeHtml(image)}" alt="${escapeHtml(car.title || 'Автомобиль')}" onerror="this.src='images/car-hero.png'">
+                        <span>${escapeHtml(car.country || 'Авто')}</span>
+                    </div>
+                    <div class="catalog-car-body">
+                        <h3>${escapeHtml(car.title || 'Автомобиль')}</h3>
+                        <p>${escapeHtml(info || car.description || 'Подробности уточним при расчёте')}</p>
+                        <strong>${car.price ? `от ${formatPrice(car.price)} ₽` : 'Цена по запросу'}</strong>
+                        <button
+                            class="catalog-more"
+                            data-title="${escapeHtml(car.title || 'Автомобиль')}"
+                            data-country="${escapeHtml(car.country || '')}"
+                            data-price="${car.price ? `от ${formatPrice(car.price)} ₽` : 'Цена по запросу'}"
+                            data-image="${escapeHtml(image)}"
+                            data-info="${escapeHtml(info)}"
+                            data-text="${escapeHtml(car.description || 'Оставьте заявку, и менеджер подготовит расчёт под ключ.')}">
+                            Подробнее
+                        </button>
+                    </div>
+                </article>
+            `;
+        }).join('');
+
+        if (catalogEmpty) {
+            catalogEmpty.hidden = filtered.length > 0;
+        }
+    }
+
+    async function loadCatalogData() {
+        if (!catalogGrid || !catalogFilterList) return;
+
+        try {
+            const [carsResponse, filtersResponse] = await Promise.all([
+                fetch(`${API_BASE}/api/cars`),
+                fetch(`${API_BASE}/api/cars/filters`)
+            ]);
+
+            if (!carsResponse.ok || !filtersResponse.ok) {
+                throw new Error('Не удалось загрузить витрину');
+            }
+
+            catalogCars = await carsResponse.json();
+            renderCatalogFilters(await filtersResponse.json());
+            renderCatalogCars(Array.isArray(catalogCars) ? catalogCars : []);
+        } catch {
+            catalogGrid.innerHTML = '';
+            if (catalogEmpty) {
+                catalogEmpty.textContent = 'Витрина временно недоступна. Оставьте заявку, менеджер подберёт варианты вручную.';
+                catalogEmpty.hidden = false;
+            }
+        }
     }
 
     if (
@@ -487,29 +576,26 @@ window.addEventListener('DOMContentLoaded', () => {
         carModalPrice &&
         carModalText
     ) {
-        catalogMoreButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                carModalImage.src = button.dataset.image || '';
-                carModalCountry.textContent = button.dataset.country || '';
-                carModalTitle.textContent = button.dataset.title || '';
-                carModalInfo.textContent = button.dataset.info || '';
-                carModalPrice.textContent = button.dataset.price || '';
-                carModalText.textContent = button.dataset.text || '';
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('.catalog-more');
+            if (!button) return;
 
-                carModal.classList.add('active');
-            });
+            carModalImage.src = button.dataset.image || '';
+            carModalCountry.textContent = button.dataset.country || '';
+            carModalTitle.textContent = button.dataset.title || '';
+            carModalInfo.textContent = button.dataset.info || '';
+            carModalPrice.textContent = button.dataset.price || '';
+            carModalText.textContent = button.dataset.text || '';
+            carModal.classList.add('active');
         });
 
-        carModalClose.addEventListener('click', () => {
-            carModal.classList.remove('active');
-        });
-
-        carModal.addEventListener('click', (e) => {
-            if (e.target === carModal) {
-                carModal.classList.remove('active');
-            }
+        carModalClose.addEventListener('click', () => carModal.classList.remove('active'));
+        carModal.addEventListener('click', (event) => {
+            if (event.target === carModal) carModal.classList.remove('active');
         });
     }
+
+    loadCatalogData();
 
     const auctionSearchForm = document.getElementById('auctionSearchForm');
     const auctionRefresh = document.getElementById('auctionRefresh');
@@ -521,6 +607,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const auctionLeadTitle = document.getElementById('auctionLeadTitle');
     const auctionLeadLotId = document.getElementById('auctionLeadLotId');
     const auctionLeadLotTitle = document.getElementById('auctionLeadLotTitle');
+    const auctionManufacturer = document.getElementById('auctionManufacturer');
+    const auctionModel = document.getElementById('auctionModel');
 
     function auctionTitle(lot) {
         return [lot.manufacturer, lot.model, lot.year].filter(Boolean).join(' ') || `Лот ${lot.id}`;
@@ -540,6 +628,44 @@ window.addEventListener('DOMContentLoaded', () => {
         auctionState.textContent = message;
         auctionState.classList.toggle('error', type === 'error');
         auctionState.hidden = false;
+    }
+
+    function setSelectOptions(select, values, placeholder) {
+        if (!select) return;
+        select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>`
+            + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+    }
+
+    async function loadAuctionManufacturers() {
+        if (!auctionManufacturer) return;
+        try {
+            const response = await fetch(`${API_BASE}/api/auctions/manufacturers`);
+            if (!response.ok) throw new Error(await parseApiMessage(response));
+            const values = await response.json();
+            setSelectOptions(auctionManufacturer, Array.isArray(values) ? values : [], 'Любая марка');
+        } catch {
+            setSelectOptions(auctionManufacturer, [], 'Марки временно недоступны');
+        }
+    }
+
+    async function loadAuctionModels(manufacturer) {
+        if (!auctionModel) return;
+        if (!manufacturer) {
+            auctionModel.disabled = true;
+            setSelectOptions(auctionModel, [], 'Сначала выберите марку');
+            return;
+        }
+        auctionModel.disabled = true;
+        setSelectOptions(auctionModel, [], 'Загружаем модели...');
+        try {
+            const response = await fetch(`${API_BASE}/api/auctions/models?manufacturer=${encodeURIComponent(manufacturer)}`);
+            if (!response.ok) throw new Error(await parseApiMessage(response));
+            const values = await response.json();
+            setSelectOptions(auctionModel, Array.isArray(values) ? values : [], 'Любая модель');
+            auctionModel.disabled = false;
+        } catch {
+            setSelectOptions(auctionModel, [], 'Модели временно недоступны');
+        }
     }
 
     function renderAuctionLots(items) {
@@ -641,6 +767,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 searchAuctions();
             }
         });
+    }
+
+    if (auctionManufacturer) {
+        auctionManufacturer.addEventListener('change', () => {
+            loadAuctionModels(auctionManufacturer.value);
+        });
+        loadAuctionManufacturers();
     }
 
     if (auctionRefresh) {

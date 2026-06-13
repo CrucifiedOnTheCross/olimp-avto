@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.olimpavto.api.CarsApiDelegate;
 import ru.olimpavto.common.NotFoundException;
+import ru.olimpavto.dto.CarFiltersResponse;
 import ru.olimpavto.dto.CarRequest;
 import ru.olimpavto.dto.CarResponse;
 
@@ -39,5 +40,26 @@ public class CarsController implements CarsApiDelegate {
         return ResponseEntity.ok(repository.findAll().stream()
                 .map(mapper::toResponse)
                 .toList());
+    }
+
+    @Override
+    public ResponseEntity<CarFiltersResponse> listCarFilters() {
+        List<String> manufacturers = repository.findAll().stream()
+                .map(CarEntity::getTitle)
+                .map(this::manufacturer)
+                .distinct()
+                .sorted()
+                .toList();
+
+        return ResponseEntity.ok(new CarFiltersResponse()
+                .countries(repository.findDistinctCountries())
+                .manufacturers(manufacturers));
+    }
+
+    private String manufacturer(String title) {
+        if (title == null || title.isBlank()) {
+            return "Другое";
+        }
+        return title.trim().split("\\s+")[0];
     }
 }

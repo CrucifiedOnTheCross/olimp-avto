@@ -79,6 +79,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/auctions/manufacturers:
+    get:
+      tags: [auctions]
+      operationId: listAuctionManufacturers
+      summary: List available auction manufacturers
+      responses:
+        '200':
+          description: Manufacturers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '503':
+          description: External auction API is unavailable or not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auctions/models:
+    get:
+      tags: [auctions]
+      operationId: listAuctionModels
+      summary: List available auction models for manufacturer
+      parameters:
+        - name: manufacturer
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 80
+      responses:
+        '200':
+          description: Models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '503':
           description: External auction API is unavailable or not configured
           content:
@@ -281,6 +329,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/cars/filters:
+    get:
+      tags: [cars]
+      operationId: listCarFilters
+      summary: List available catalog filters from database
+      responses:
+        '200':
+          description: Available filters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarFiltersResponse'
   /api/cars/{id}:
     get:
       tags: [cars]
@@ -510,6 +570,18 @@ components:
             id:
               type: integer
               format: int64
+    CarFiltersResponse:
+      type: object
+      required: [countries, manufacturers]
+      properties:
+        countries:
+          type: array
+          items:
+            type: string
+        manufacturers:
+          type: array
+          items:
+            type: string
     ReviewResponse:
       type: object
       required: [id, rating, text, name, carModel, country]

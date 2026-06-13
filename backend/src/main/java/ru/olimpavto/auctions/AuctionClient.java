@@ -28,6 +28,7 @@ public class AuctionClient {
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
     private final Map<String, CacheEntry> cache = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, RawCacheEntry> rawCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     public AuctionClient(
             AuctionProperties properties,
@@ -69,6 +70,27 @@ public class AuctionClient {
         return lots.getFirst();
     }
 
+    public List<String> manufacturers() {
+        return executeRows("select distinct marka_name from main order by marka_name")
+                .stream()
+                .map(row -> first(row, "marka_name", "manufacturer", "brand", "make"))
+                .filter(value -> value != null && !value.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
+    public List<String> models(String manufacturer) {
+        return executeRows("select distinct model_name from main where marka_name = '%s' order by model_name"
+                .formatted(escape(manufacturer)))
+                .stream()
+                .map(row -> first(row, "model_name", "model", "name"))
+                .filter(value -> value != null && !value.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
     private List<AuctionLot> execute(String sql) {
         if (properties.getApiCode() == null || properties.getApiCode().isBlank()) {
             throw new AuctionApiException("API-код аукционов не настроен");
@@ -89,13 +111,45 @@ public class AuctionClient {
         }
     }
 
+    private List<Map<String, String>> executeRows(String sql) {
+        if (properties.getApiCode() == null || properties.getApiCode().isBlank()) {
+            throw new AuctionApiException("API-код аукционов не настроен");
+        }
+
+        String cacheKey = "rows:" + sql;
+        RawCacheEntry cached = rawCache.get(cacheKey);
+        if (cached != null && cached.isAlive(properties.getCacheTtl())) {
+            return cached.rows();
+        }
+
+        URI uri = URI.create(properties.getApiUrl()
+                + "?json&code=" + encode(properties.getApiCode())
+                + "&sql=" + encode(sql));
+
+        try {
+            String body = restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .body(String.class);
+            List<Map<String, String>> rows = parseRows(body);
+            rawCache.put(cacheKey, new RawCacheEntry(rows, Instant.now()));
+            return rows;
+        } catch (RestClientException exception) {
+            throw new AuctionApiException("API аукционов временно недоступен", exception);
+        }
+    }
+
     private List<AuctionLot> parseLots(String body) {
+        return parseRows(body).stream().map(this::toLot).toList();
+    }
+
+    private List<Map<String, String>> parseRows(String body) {
         try {
             JsonNode root = objectMapper.readTree(body);
             JsonNode rows = rows(root);
-            List<AuctionLot> result = new ArrayList<>();
+            List<Map<String, String>> result = new ArrayList<>();
             if (rows.isArray()) {
-                rows.forEach(row -> result.add(toLot(row)));
+                rows.forEach(row -> result.add(rawFields(row)));
             }
             return result;
         } catch (Exception exception) {
@@ -116,8 +170,7 @@ public class AuctionClient {
         return objectMapper.createArrayNode();
     }
 
-    private AuctionLot toLot(JsonNode row) {
-        Map<String, String> rawFields = rawFields(row);
+    private AuctionLot toLot(Map<String, String> rawFields) {
         String id = first(rawFields, "id", "ID", "lot_id", "lotId", "auction_id");
         if (id == null || id.isBlank()) {
             id = first(rawFields, "lot", "LOT", "lot_no", "lotNo");
@@ -196,6 +249,10 @@ public class AuctionClient {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
+    private String escape(String value) {
+        return value.replace("\\", "\\\\").replace("'", "''");
+    }
+
     private SimpleClientHttpRequestFactory requestFactory(AuctionProperties properties) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(properties.getTimeout());
@@ -209,4 +266,12 @@ public class AuctionClient {
             return createdAt.plus(ttl).isAfter(Instant.now());
         }
     }
+
+    private record RawCacheEntry(List<Map<String, String>> rows, Instant createdAt) {
+
+        private boolean isAlive(java.time.Duration ttl) {
+            return createdAt.plus(ttl).isAfter(Instant.now());
+        }
+    }
+
 }

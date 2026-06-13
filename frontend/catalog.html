@@ -82,12 +82,9 @@
                 <div class="catalog-layout">
                     <aside class="catalog-sidebar">
                         <h3>Витрина</h3>
-                        <button class="catalog-category active" data-filter="all">Все</button>
-                        <button class="catalog-category" data-filter="japan">Японские</button>
-                        <button class="catalog-category" data-filter="korea">Корейские</button>
-                        <button class="catalog-category" data-filter="china">Китайские</button>
-                        <button class="catalog-category" data-filter="crossover">Кроссоверы</button>
-                        <button class="catalog-category" data-filter="minivan">Минивэны</button>
+                        <div class="catalog-filter-list" id="catalogFilterList">
+                            <button class="catalog-category active" data-filter-type="all" data-filter-value="all">Все</button>
+                        </div>
 
                         <div class="catalog-filter-group">
                             <h4>Что дальше</h4>
@@ -109,73 +106,7 @@
                             </button>
                         </div>
 
-                        <div class="catalog-grid">
-                            <article class="catalog-car" data-country="japan crossover">
-                                <div class="catalog-car-img">
-                                    <img src="images/car-hero.png" alt="Nissan Juke">
-                                    <span>Япония</span>
-                                </div>
-                                <div class="catalog-car-body">
-                                    <h3>Nissan Juke</h3>
-                                    <p>2015 · 1.5 л · бензин · городской кроссовер</p>
-                                    <strong>от 1 050 000 ₽</strong>
-                                    <button
-                                        class="catalog-more"
-                                        data-title="Nissan Juke"
-                                        data-country="Япония"
-                                        data-price="от 1 050 000 ₽"
-                                        data-image="images/car-hero.png"
-                                        data-info="2015 · 1.5 л · бензин · городской кроссовер"
-                                        data-text="Компактный вариант для города. Менеджер подберет живые лоты и рассчитает доставку под ключ.">
-                                        Подробнее
-                                    </button>
-                                </div>
-                            </article>
-
-                            <article class="catalog-car" data-country="japan minivan">
-                                <div class="catalog-car-img">
-                                    <img src="images/car-hero.png" alt="Suzuki Solio">
-                                    <span>Япония</span>
-                                </div>
-                                <div class="catalog-car-body">
-                                    <h3>Suzuki Solio</h3>
-                                    <p>2022 · 1.2 л · бензин · мягкий гибрид</p>
-                                    <strong>от 1 250 000 ₽</strong>
-                                    <button
-                                        class="catalog-more"
-                                        data-title="Suzuki Solio"
-                                        data-country="Япония"
-                                        data-price="от 1 250 000 ₽"
-                                        data-image="images/car-hero.png"
-                                        data-info="2022 · 1.2 л · бензин · мягкий гибрид"
-                                        data-text="Практичный минивэн с низким расходом. Можно искать похожие лоты на японских аукционах.">
-                                        Подробнее
-                                    </button>
-                                </div>
-                            </article>
-
-                            <article class="catalog-car" data-country="china crossover">
-                                <div class="catalog-car-img">
-                                    <img src="images/car-hero.png" alt="Geely Monjaro">
-                                    <span>Китай</span>
-                                </div>
-                                <div class="catalog-car-body">
-                                    <h3>Geely Monjaro</h3>
-                                    <p>2023 · 2.0 л · бензин · автомат</p>
-                                    <strong>от 3 450 000 ₽</strong>
-                                    <button
-                                        class="catalog-more"
-                                        data-title="Geely Monjaro"
-                                        data-country="Китай"
-                                        data-price="от 3 450 000 ₽"
-                                        data-image="images/car-hero.png"
-                                        data-info="2023 · 2.0 л · бензин · автомат"
-                                        data-text="Современный кроссовер с богатой комплектацией. Оставьте заявку для точного расчета.">
-                                        Подробнее
-                                    </button>
-                                </div>
-                            </article>
-                        </div>
+                        <div class="catalog-grid" id="catalogGrid"></div>
 
                         <div class="catalog-empty" id="catalogEmpty" hidden>
                             В этой категории пока нет готовых примеров. Перейдите в аукционы или оставьте заявку на подбор.
@@ -194,11 +125,15 @@
                         </label>
                         <label>
                             Марка
-                            <input type="text" name="manufacturer" placeholder="Toyota">
+                            <select name="manufacturer" id="auctionManufacturer">
+                                <option value="">Любая марка</option>
+                            </select>
                         </label>
                         <label>
                             Модель
-                            <input type="text" name="model" placeholder="Prius">
+                            <select name="model" id="auctionModel" disabled>
+                                <option value="">Сначала выберите марку</option>
+                            </select>
                         </label>
                         <div class="auction-search-row">
                             <label>

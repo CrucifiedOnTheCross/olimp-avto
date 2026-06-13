@@ -59,6 +59,19 @@ public class AuctionsController implements AuctionsApiDelegate {
     }
 
     @Override
+    public ResponseEntity<java.util.List<String>> listAuctionManufacturers() {
+        return ResponseEntity.ok(auctionClient.manufacturers());
+    }
+
+    @Override
+    public ResponseEntity<java.util.List<String>> listAuctionModels(String manufacturer) {
+        if (manufacturer == null || manufacturer.isBlank()) {
+            throw new BadRequestException("Не выбрана марка", Map.of("manufacturer", "Выберите марку"));
+        }
+        return ResponseEntity.ok(auctionClient.models(manufacturer.trim()));
+    }
+
+    @Override
     public ResponseEntity<FormResponse> sendAuctionLead(@Valid AuctionLeadRequest auctionLeadRequest) {
         if (!Boolean.TRUE.equals(auctionLeadRequest.getPolicyAccepted())) {
             throw new BadRequestException(
