@@ -474,7 +474,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     ${escapeHtml(country)}
                 </button>
             `).join('')}
-            ${manufacturers.length ? `<div class="catalog-filter-subtitle">Марки в БД</div>` : ''}
+            ${manufacturers.length ? `<div class="catalog-filter-subtitle">Марки автомобилей</div>` : ''}
             ${manufacturers.map(manufacturer => `
                 <button class="catalog-category" data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
                     ${escapeHtml(manufacturer)}
@@ -562,7 +562,7 @@ window.addEventListener('DOMContentLoaded', () => {
         } catch {
             catalogGrid.innerHTML = '';
             if (catalogEmpty) {
-                catalogEmpty.textContent = 'Витрина временно недоступна. Оставьте заявку, менеджер подберёт варианты вручную.';
+                catalogEmpty.textContent = 'Готовые варианты временно недоступны. Оставьте заявку, менеджер подберёт автомобиль вручную.';
                 catalogEmpty.hidden = false;
             }
         }
