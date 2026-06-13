@@ -220,6 +220,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if (modal) {
         openBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                document.querySelectorAll('.car-modal.active, .review-modal.active, .full-review-modal.active, .auction-lead-modal.active')
+                    .forEach(activeModal => activeModal.classList.remove('active'));
                 modal.classList.add('active');
             });
         });
