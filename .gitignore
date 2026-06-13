@@ -3,6 +3,7 @@
 
 backend/.gradle/
 backend/build/
+backend/bin/
 backend/out/
 backend/*.log
 backend/.idea/

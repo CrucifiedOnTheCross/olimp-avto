@@ -129,6 +129,32 @@ src/main/resources/application.yml
 | `APP_ADMIN_USERNAME` | логин администратора | `admin` |
 | `APP_ADMIN_PASSWORD` | пароль администратора | `admin123` |
 | `APP_PUBLIC_BASE_URL` | публичный адрес backend для ссылок модерации в письмах | `http://localhost:8080` |
+| `AVTOJP_API_URL` | адрес внешнего API аукционов | `http://78.46.90.228/gzip/` |
+| `AVTOJP_API_CODE` | код доступа к API аукционов | пусто |
+| `AVTOJP_TIMEOUT` | таймаут внешнего API | `5s` |
+| `AVTOJP_CACHE_TTL` | время кеширования поиска аукционов | `10m` |
+
+## Аукционы
+
+Аукционная интеграция не использует готовый внешний поддомен. Frontend обращается в наш backend, а backend ходит во внешний API avto.jp/ajes и возвращает безопасные DTO.
+
+Публичные endpoint'ы:
+
+```text
+GET  /api/auctions/search
+GET  /api/auctions/{id}
+POST /api/auctions/leads
+```
+
+Код доступа к внешнему API нельзя хранить во frontend. Для production задайте его только на сервере:
+
+```text
+AVTOJP_API_CODE=код-от-поставщика
+```
+
+Если `AVTOJP_API_CODE` не задан, страница аукционов откроется, но поиск вернёт сообщение `API-код аукционов не настроен`.
+
+Backend не принимает SQL от браузера. SQL собирается на сервере из разрешённых полей поиска, ограничивает выдачу максимум 50 лотами и кеширует результаты.
 
 ## Модерация отзывов
 

@@ -455,4 +455,165 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const auctionSearchForm = document.getElementById('auctionSearchForm');
+    const auctionRefresh = document.getElementById('auctionRefresh');
+    const auctionGrid = document.getElementById('auctionGrid');
+    const auctionState = document.getElementById('auctionState');
+    const auctionLeadModal = document.getElementById('auctionLeadModal');
+    const auctionLeadForm = document.getElementById('auctionLeadForm');
+    const auctionLeadClose = document.getElementById('auctionLeadClose');
+    const auctionLeadTitle = document.getElementById('auctionLeadTitle');
+    const auctionLeadLotId = document.getElementById('auctionLeadLotId');
+    const auctionLeadLotTitle = document.getElementById('auctionLeadLotTitle');
+
+    function auctionTitle(lot) {
+        return [lot.manufacturer, lot.model, lot.year].filter(Boolean).join(' ') || `Лот ${lot.id}`;
+    }
+
+    function auctionMeta(lot) {
+        return [
+            lot.auction,
+            lot.lot ? `лот ${lot.lot}` : '',
+            lot.grade ? `оценка ${lot.grade}` : '',
+            lot.mileage ? `${formatPrice(lot.mileage)} км` : ''
+        ].filter(Boolean).join(' · ');
+    }
+
+    function setAuctionState(message, type = 'muted') {
+        if (!auctionState) return;
+        auctionState.textContent = message;
+        auctionState.classList.toggle('error', type === 'error');
+        auctionState.hidden = false;
+    }
+
+    function renderAuctionLots(items) {
+        if (!auctionGrid) return;
+
+        if (!items.length) {
+            auctionGrid.innerHTML = '';
+            setAuctionState('По таким параметрам лоты не найдены.');
+            return;
+        }
+
+        if (auctionState) {
+            auctionState.hidden = true;
+        }
+
+        auctionGrid.innerHTML = items.map(lot => `
+            <article class="auction-card">
+                <div class="auction-card-media">
+                    ${lot.imageUrl
+                        ? `<img src="${escapeHtml(lot.imageUrl)}" alt="${escapeHtml(auctionTitle(lot))}">`
+                        : `<div class="auction-card-placeholder">Фото появится после загрузки данных</div>`}
+                </div>
+                <div class="auction-card-body">
+                    <span>${escapeHtml(lot.auction || 'Аукцион')}</span>
+                    <h3>${escapeHtml(auctionTitle(lot))}</h3>
+                    <p>${escapeHtml(auctionMeta(lot) || 'Данные лота уточняются')}</p>
+                    <dl>
+                        <div><dt>Цена</dt><dd>${lot.price ? `${formatPrice(lot.price)} ¥` : 'по запросу'}</dd></div>
+                        <div><dt>Цвет</dt><dd>${escapeHtml(lot.color || '-')}</dd></div>
+                        <div><dt>Двигатель</dt><dd>${escapeHtml(lot.engine || '-')}</dd></div>
+                    </dl>
+                    <button
+                        class="auction-lead-open"
+                        data-lot-id="${escapeHtml(lot.id)}"
+                        data-lot-title="${escapeHtml(auctionTitle(lot))}">
+                        Рассчитать под ключ
+                    </button>
+                </div>
+            </article>
+        `).join('');
+
+        auctionGrid.querySelectorAll('.auction-lead-open').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!auctionLeadModal || !auctionLeadTitle || !auctionLeadLotId || !auctionLeadLotTitle) return;
+                auctionLeadTitle.textContent = button.dataset.lotTitle || 'Аукционный лот';
+                auctionLeadLotId.value = button.dataset.lotId || '';
+                auctionLeadLotTitle.value = button.dataset.lotTitle || '';
+                auctionLeadModal.classList.add('active');
+            });
+        });
+    }
+
+    async function searchAuctions() {
+        if (!auctionSearchForm || !auctionGrid) return;
+
+        const formData = new FormData(auctionSearchForm);
+        const params = new URLSearchParams();
+        ['query', 'manufacturer', 'model', 'yearFrom', 'yearTo', 'maxMileage'].forEach(name => {
+            const value = String(formData.get(name) || '').trim();
+            if (value) {
+                params.set(name, value);
+            }
+        });
+        params.set('limit', '20');
+
+        const button = auctionSearchForm.querySelector('button[type="submit"]');
+        const previousText = button ? button.textContent : '';
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Ищем...';
+        }
+        setAuctionState('Загружаем лоты...');
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auctions/search?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error(await parseApiMessage(response));
+            }
+            const result = await response.json();
+            renderAuctionLots(Array.isArray(result.items) ? result.items : []);
+        } catch (error) {
+            auctionGrid.innerHTML = '';
+            setAuctionState(error.message || 'Не удалось загрузить аукционные лоты', 'error');
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent = previousText;
+            }
+        }
+    }
+
+    if (auctionSearchForm) {
+        auctionSearchForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (auctionSearchForm.reportValidity()) {
+                searchAuctions();
+            }
+        });
+    }
+
+    if (auctionRefresh) {
+        auctionRefresh.addEventListener('click', searchAuctions);
+    }
+
+    if (auctionLeadClose && auctionLeadModal) {
+        auctionLeadClose.addEventListener('click', () => auctionLeadModal.classList.remove('active'));
+        auctionLeadModal.addEventListener('click', (event) => {
+            if (event.target === auctionLeadModal) {
+                auctionLeadModal.classList.remove('active');
+            }
+        });
+    }
+
+    if (auctionLeadForm) {
+        auctionLeadForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!auctionLeadForm.reportValidity()) {
+                return;
+            }
+
+            const formData = new FormData(auctionLeadForm);
+            submitJsonForm(auctionLeadForm, '/api/auctions/leads', {
+                lotId: String(formData.get('lotId') || '').trim(),
+                lotTitle: String(formData.get('lotTitle') || '').trim(),
+                name: String(formData.get('name') || '').trim(),
+                phone: String(formData.get('phone') || '').trim(),
+                comment: String(formData.get('comment') || '').trim(),
+                policyAccepted: formData.get('policyAccepted') === 'on'
+            });
+        });
+    }
+
 });

@@ -32,6 +32,11 @@ spring:
 
 app:
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+  auctions:
+    api-url: ${AVTOJP_API_URL:http://78.46.90.228/gzip/}
+    api-code: ${AVTOJP_API_CODE:}
+    timeout: ${AVTOJP_TIMEOUT:5s}
+    cache-ttl: ${AVTOJP_CACHE_TTL:10m}
   security:
     admin-username: ${APP_ADMIN_USERNAME:admin}
     admin-password: ${APP_ADMIN_PASSWORD:admin123}

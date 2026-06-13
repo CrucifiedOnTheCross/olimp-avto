@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аукционы — Олимп Авто</title>
+    <link rel="icon" href="images/logo2.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<input type="checkbox" id="mobileMenuToggle" class="mobile-menu-toggle">
+
+<header class="header">
+    <div class="container nav">
+        <a href="mainveb.html" class="logo">
+            <img src="images/logo2.png" alt="Олимп Авто">
+            <div class="logo-text">
+                <span class="logo-title">Олимп <span>Авто</span></span>
+                <span class="logo-subtitle">Авто со всего мира</span>
+            </div>
+        </a>
+
+        <nav class="menu">
+            <a href="about.html">О нас</a>
+            <a href="contacts.html">Контакты</a>
+            <a href="catalog.html">Каталог</a>
+            <a href="auctions.html">Аукционы</a>
+        </nav>
+
+        <button class="nav-btn open-modal">Рассчитать</button>
+        <label for="mobileMenuToggle" class="burger">☰</label>
+    </div>
+</header>
+
+<div class="mobile-menu">
+    <label for="mobileMenuToggle" class="close-menu">×</label>
+    <div class="mobile-header">
+        <img src="images/logo2.png" alt="Олимп Авто">
+        <div>
+            <div class="mobile-title">Олимп <span>Авто</span></div>
+            <div class="mobile-subtitle">Авто со всего мира</div>
+        </div>
+    </div>
+    <nav class="mobile-links">
+        <a href="mainveb.html">Главная</a>
+        <a href="about.html">О нас</a>
+        <a href="contacts.html">Контакты</a>
+        <a href="catalog.html">Каталог</a>
+        <a href="auctions.html">Аукционы</a>
+    </nav>
+    <button class="mobile-btn open-modal">Рассчитать</button>
+</div>
+
+<main class="auction-page">
+    <section class="auction-hero">
+        <div class="container">
+            <span>Аукционные автомобили</span>
+            <h1>Поиск авто <span>с японских аукционов</span></h1>
+            <p>
+                Подберите лот по марке, модели, году и пробегу.
+                Заявка уйдет менеджеру, а доступы к аукционному API останутся на сервере.
+            </p>
+        </div>
+    </section>
+
+    <section class="auction-workspace">
+        <div class="container auction-layout">
+            <form class="auction-search" id="auctionSearchForm">
+                <h2>Фильтры</h2>
+                <label>
+                    Быстрый поиск
+                    <input type="search" name="query" placeholder="Например, Toyota Prius">
+                </label>
+                <label>
+                    Марка
+                    <input type="text" name="manufacturer" placeholder="Toyota">
+                </label>
+                <label>
+                    Модель
+                    <input type="text" name="model" placeholder="Prius">
+                </label>
+                <div class="auction-search-row">
+                    <label>
+                        Год от
+                        <input type="number" name="yearFrom" min="1980" max="2100" placeholder="2018">
+                    </label>
+                    <label>
+                        Год до
+                        <input type="number" name="yearTo" min="1980" max="2100" placeholder="2026">
+                    </label>
+                </div>
+                <label>
+                    Пробег до, км
+                    <input type="number" name="maxMileage" min="1" placeholder="80000">
+                </label>
+                <button type="submit">Найти лоты</button>
+                <p class="auction-note">Показываем до 20 актуальных лотов, чтобы поиск оставался быстрым.</p>
+            </form>
+
+            <div class="auction-results">
+                <div class="auction-results-top">
+                    <div>
+                        <span>Результаты поиска</span>
+                        <h2>Аукционные лоты</h2>
+                    </div>
+                    <button class="auction-refresh" id="auctionRefresh" type="button">Обновить</button>
+                </div>
+
+                <div class="auction-state" id="auctionState">
+                    Задайте параметры и запустите поиск.
+                </div>
+
+                <div class="auction-grid" id="auctionGrid"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="auction-lead-modal" id="auctionLeadModal">
+    <form class="auction-lead-box" id="auctionLeadForm">
+        <button class="auction-lead-close" id="auctionLeadClose" type="button">×</button>
+        <span>Заявка по лоту</span>
+        <h2 id="auctionLeadTitle">Аукционный лот</h2>
+        <input type="hidden" name="lotId" id="auctionLeadLotId">
+        <input type="hidden" name="lotTitle" id="auctionLeadLotTitle">
+        <label>
+            Ваше имя
+            <input type="text" name="name" required minlength="2" maxlength="120">
+        </label>
+        <label>
+            Телефон
+            <input type="tel" name="phone" required pattern="^\+?[0-9\s()\-]{10,20}$">
+        </label>
+        <label>
+            Комментарий
+            <textarea name="comment" maxlength="1000" placeholder="Что важно уточнить по этому лоту"></textarea>
+        </label>
+        <label class="privacy-check">
+            <input type="checkbox" name="policyAccepted" required>
+            <span>Согласен на обработку персональных данных</span>
+        </label>
+        <button type="submit">Отправить заявку</button>
+    </form>
+</div>
+
+<script src="config.js"></script>
+<script src="scripts.js"></script>
+
+</body>
+</html>

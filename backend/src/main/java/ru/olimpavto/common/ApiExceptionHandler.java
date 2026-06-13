@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import ru.olimpavto.auctions.AuctionApiException;
 import ru.olimpavto.dto.ErrorResponse;
 
 @RestControllerAdvice
@@ -58,6 +59,13 @@ public class ApiExceptionHandler {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(AuctionApiException.class)
+    public ResponseEntity<ErrorResponse> handleAuctionApi(AuctionApiException exception) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
     @ExceptionHandler(Exception.class)
