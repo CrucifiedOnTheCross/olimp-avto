@@ -2758,11 +2758,18 @@ body {
     color: rgba(255,255,255,0.68);
     font-weight: 900;
     cursor: pointer;
+    transition: color 0.22s ease, background 0.22s ease, transform 0.22s ease;
+}
+
+.catalog-mode-tab:hover {
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 .catalog-mode-tab.active {
     color: #fff;
     background: linear-gradient(135deg, #9a6508, #e0a236);
+    box-shadow: 0 12px 30px rgba(224,162,54,0.18);
 }
 
 .catalog-mode-panel {
@@ -2771,6 +2778,27 @@ body {
 
 .catalog-mode-panel.active {
     display: block;
+    animation: catalogPanelIn 0.34s ease both;
+}
+
+@keyframes catalogPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+        filter: blur(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-mode-panel.active {
+        animation: none;
+    }
 }
 
 .catalog-layout {
@@ -2865,33 +2893,67 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 18px;
+    min-height: 56px;
+    margin-bottom: 24px;
 }
 
-.catalog-kicker {
+.catalog-kicker,
+.auction-results-top span {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #e0a236;
     font-size: 12px;
     font-weight: 800;
+    line-height: 1.2;
     text-transform: uppercase;
 }
 
-.catalog-top h2 {
+.catalog-top h2,
+.auction-results-top h2 {
     margin: 0;
-    font-size: 32px;
+    color: #fff;
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.08;
+    letter-spacing: 0;
 }
 
-.catalog-switch-link {
+.catalog-switch-link,
+.auction-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
     min-height: 46px;
-    padding: 0 20px;
+    min-width: 164px;
+    padding: 0 22px;
     border: 1px solid rgba(224,162,54,0.38);
     border-radius: 16px;
-    background: rgba(224,162,54,0.12);
+    background:
+        linear-gradient(180deg, rgba(224,162,54,0.16), rgba(224,162,54,0.07)),
+        rgba(7,4,5,0.82);
     color: #fff;
+    font-family: inherit;
+    font-size: 14px;
     font-weight: 900;
+    line-height: 1;
+    text-align: center;
     cursor: pointer;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 12px 28px rgba(0,0,0,0.22);
+    transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.catalog-switch-link:hover,
+.auction-refresh:hover {
+    transform: translateY(-2px);
+    border-color: rgba(224,162,54,0.68);
+    background:
+        linear-gradient(135deg, rgba(154,101,8,0.95), rgba(224,162,54,0.95));
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        0 18px 34px rgba(224,162,54,0.16);
 }
 
 .catalog-empty {
@@ -3282,6 +3344,11 @@ body {
 
     .catalog-top {
         flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .catalog-switch-link {
+        width: 100%;
     }
 
     .catalog-sort {
@@ -3369,7 +3436,6 @@ body {
 }
 
 .auction-search h2,
-.auction-results-top h2,
 .auction-lead-box h2 {
     margin: 0;
     font-size: 24px;
@@ -3437,7 +3503,6 @@ body {
 }
 
 .auction-search button,
-.auction-refresh,
 .auction-lead-open,
 .auction-lead-box button[type="submit"] {
     min-height: 46px;
@@ -3451,7 +3516,6 @@ body {
 }
 
 .auction-search button:hover,
-.auction-refresh:hover,
 .auction-lead-open:hover,
 .auction-lead-box button[type="submit"]:hover {
     transform: translateY(-2px);
@@ -3481,13 +3545,8 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 18px;
-}
-
-.auction-refresh {
-    padding: 0 20px;
-    background: rgba(224,162,54,0.12);
-    border: 1px solid rgba(224,162,54,0.38);
+    min-height: 56px;
+    margin-bottom: 24px;
 }
 
 .auction-state {
