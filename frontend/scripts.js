@@ -425,6 +425,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const catalogModePanels = document.querySelectorAll('[data-catalog-panel]');
     const catalogCategoryButtons = document.querySelectorAll('.catalog-category');
     const catalogCards = document.querySelectorAll('.catalog-car');
+    const catalogEmpty = document.getElementById('catalogEmpty');
 
     function setCatalogMode(mode) {
         catalogModeButtons.forEach(button => {
@@ -460,10 +461,18 @@ window.addEventListener('DOMContentLoaded', () => {
                 const filter = button.dataset.filter || 'all';
                 catalogCategoryButtons.forEach(item => item.classList.remove('active'));
                 button.classList.add('active');
+                let visibleCount = 0;
                 catalogCards.forEach(card => {
                     const countries = card.dataset.country || '';
-                    card.hidden = filter !== 'all' && !countries.includes(filter);
+                    const visible = filter === 'all' || countries.includes(filter);
+                    card.hidden = !visible;
+                    if (visible) {
+                        visibleCount += 1;
+                    }
                 });
+                if (catalogEmpty) {
+                    catalogEmpty.hidden = visibleCount > 0;
+                }
             });
         });
     }

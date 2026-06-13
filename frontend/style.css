@@ -2744,14 +2744,16 @@ body {
     margin: 0 0 28px;
     padding: 6px;
     border: 1px solid rgba(224,162,54,0.22);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.05);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at top left, rgba(224,162,54,0.08), transparent 34%),
+        linear-gradient(180deg, rgba(60,8,10,0.72), rgba(8,4,5,0.94));
 }
 
 .catalog-mode-tab {
     min-height: 46px;
     border: 0;
-    border-radius: 8px;
+    border-radius: 14px;
     background: transparent;
     color: rgba(255,255,255,0.68);
     font-weight: 900;
@@ -2877,11 +2879,21 @@ body {
     min-height: 46px;
     padding: 0 20px;
     border: 1px solid rgba(224,162,54,0.38);
-    border-radius: 8px;
+    border-radius: 16px;
     background: rgba(224,162,54,0.12);
     color: #fff;
     font-weight: 900;
     cursor: pointer;
+}
+
+.catalog-empty {
+    margin-top: 18px;
+    padding: 20px;
+    border-radius: 22px;
+    border: 1px solid rgba(224,162,54,0.22);
+    background: rgba(224,162,54,0.08);
+    color: rgba(255,255,255,0.72);
+    line-height: 1.55;
 }
 
 .catalog-search {
@@ -3341,9 +3353,11 @@ body {
     gap: 14px;
     padding: 20px;
     border: 1px solid rgba(244, 177, 61, 0.26);
-    border-radius: 8px;
-    background: rgba(30, 8, 8, 0.88);
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at top left, rgba(224,162,54,0.11), transparent 34%),
+        linear-gradient(180deg, rgba(60,8,10,0.88), rgba(8,4,5,0.98));
+    box-shadow: 0 28px 70px rgba(0,0,0,0.55);
 }
 
 .auction-search h2,
@@ -3368,8 +3382,9 @@ body {
     width: 100%;
     min-height: 46px;
     border: 1px solid rgba(244, 177, 61, 0.24);
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.34);
+    border-radius: 16px;
+    background:
+        linear-gradient(135deg, rgba(60,8,10,0.66), rgba(10,5,6,0.94));
     color: #fff;
     padding: 0 14px;
     font: inherit;
@@ -3400,8 +3415,8 @@ body {
 .auction-lead-box button[type="submit"] {
     min-height: 46px;
     border: 0;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #b87508, #f0b33d);
+    border-radius: 16px;
+    background: linear-gradient(135deg, #9a6508, #e0a236);
     color: #fff;
     font-weight: 900;
     cursor: pointer;
@@ -3444,15 +3459,15 @@ body {
 
 .auction-refresh {
     padding: 0 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(224,162,54,0.12);
+    border: 1px solid rgba(224,162,54,0.38);
 }
 
 .auction-state {
     padding: 18px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.06);
+    border-radius: 22px;
+    border: 1px solid rgba(224,162,54,0.18);
+    background: rgba(224,162,54,0.07);
     color: rgba(255, 255, 255, 0.7);
 }
 
@@ -3470,9 +3485,23 @@ body {
 
 .auction-card {
     overflow: hidden;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.055);
+    border-radius: 28px;
+    border: 1px solid rgba(224,162,54,0.18);
+    background:
+        radial-gradient(circle at top left, rgba(224,162,54,0.12), transparent 36%),
+        linear-gradient(180deg, rgba(60,8,10,0.9), rgba(7,4,5,0.98));
+    box-shadow:
+        0 24px 70px rgba(0,0,0,0.48),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: 0.3s ease;
+}
+
+.auction-card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(224,162,54,0.48);
+    box-shadow:
+        0 34px 90px rgba(0,0,0,0.62),
+        0 0 36px rgba(224,162,54,0.08);
 }
 
 .auction-card-media {
@@ -3528,7 +3557,7 @@ body {
 .auction-card-body dl div {
     min-width: 0;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 14px;
     background: rgba(0, 0, 0, 0.24);
 }
 
@@ -3571,7 +3600,7 @@ body {
     display: grid;
     gap: 14px;
     padding: 26px;
-    border-radius: 8px;
+    border-radius: 26px;
     border: 1px solid rgba(244, 177, 61, 0.32);
     background: #1b0808;
 }
