@@ -33,7 +33,7 @@ public class AuctionSqlBuilder {
             where.add("dayofweek(auction_date) = " + apiDay);
         }
 
-        return "select * from %s where %s order by auction_date desc limit %d,%d"
+        return "select * from %s where %s order by auction_date desc,id desc limit %d,%d"
                 .formatted(
                         criteria.source().table(),
                         String.join(" and ", where),
