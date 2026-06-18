@@ -437,6 +437,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const rateCaptchaError = document.getElementById('rateCaptchaError');
     let catalogCars = [];
     let catalogFilter = { type: 'all', value: 'all' };
+    let catalogBrandQuery = '';
     let catalogLoading = false;
     let rateCaptchaRetry = null;
     const catalogBatchSize = 4;
@@ -493,13 +494,26 @@ window.addEventListener('DOMContentLoaded', () => {
                     ${escapeHtml(country)}
                 </button>
             `).join('')}
-            ${manufacturers.length ? `<div class="catalog-filter-subtitle">Марки автомобилей</div>` : ''}
-            ${manufacturers.map(manufacturer => `
-                <button class="catalog-category ${catalogFilter.type === 'manufacturer' && catalogFilter.value === manufacturer ? 'active' : ''}"
-                        data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
-                    ${escapeHtml(manufacturer)}
-                </button>
-            `).join('')}
+            ${manufacturers.length ? `
+                <div class="catalog-filter-subtitle">
+                    <span>Марки автомобилей</span>
+                    <b>${manufacturers.length}</b>
+                </div>
+                <label class="catalog-brand-search">
+                    <span>Поиск марки</span>
+                    <input type="search" id="catalogBrandSearch" placeholder="Найти марку"
+                           value="${escapeHtml(catalogBrandQuery)}" autocomplete="off">
+                </label>
+                <div class="catalog-brand-list" id="catalogBrandList">
+                    ${manufacturers.map(manufacturer => `
+                        <button class="catalog-category ${catalogFilter.type === 'manufacturer' && catalogFilter.value === manufacturer ? 'active' : ''}"
+                                data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
+                            ${escapeHtml(manufacturer)}
+                        </button>
+                    `).join('')}
+                    <div class="catalog-brand-empty" id="catalogBrandEmpty" hidden>Марка не найдена</div>
+                </div>
+            ` : ''}
         `;
 
         catalogFilterList.querySelectorAll('.catalog-category').forEach(button => {
@@ -513,6 +527,26 @@ window.addEventListener('DOMContentLoaded', () => {
                 renderCatalogCars(catalogCars);
             });
         });
+
+        const brandSearch = document.getElementById('catalogBrandSearch');
+        const brandList = document.getElementById('catalogBrandList');
+        const brandEmpty = document.getElementById('catalogBrandEmpty');
+        if (brandSearch && brandList) {
+            const filterBrands = () => {
+                catalogBrandQuery = brandSearch.value.trim();
+                const query = catalogBrandQuery.toLocaleLowerCase('ru');
+                const buttons = [...brandList.querySelectorAll('[data-filter-type="manufacturer"]')];
+                let visible = 0;
+                buttons.forEach(button => {
+                    const matches = !query || (button.dataset.filterValue || '').toLocaleLowerCase('ru').includes(query);
+                    button.hidden = !matches;
+                    if (matches) visible += 1;
+                });
+                if (brandEmpty) brandEmpty.hidden = visible > 0;
+            };
+            brandSearch.addEventListener('input', filterBrands);
+            filterBrands();
+        }
     }
 
     function renderCatalogCars(cars) {

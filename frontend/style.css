@@ -2871,11 +2871,100 @@ body {
 }
 
 .catalog-filter-subtitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     margin: 18px 0 10px;
     color: #e0a236;
     font-size: 12px;
     font-weight: 900;
     text-transform: uppercase;
+}
+
+.catalog-filter-subtitle b {
+    display: inline-grid;
+    min-width: 24px;
+    height: 24px;
+    place-items: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(224, 162, 54, 0.14);
+    color: #f4b13d;
+    font-size: 11px;
+}
+
+.catalog-brand-search {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.catalog-brand-search > span {
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.catalog-brand-search input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(224, 162, 54, 0.28);
+    border-radius: 8px;
+    outline: none;
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+    font: inherit;
+}
+
+.catalog-brand-search input:focus {
+    border-color: rgba(224, 162, 54, 0.74);
+    box-shadow: 0 0 0 3px rgba(224, 162, 54, 0.12);
+}
+
+.catalog-brand-search input::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.catalog-brand-list {
+    max-height: min(38vh, 360px);
+    overflow-y: auto;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(224, 162, 54, 0.55) rgba(255, 255, 255, 0.06);
+}
+
+.catalog-brand-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.catalog-brand-list::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.catalog-brand-list::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(224, 162, 54, 0.55);
+}
+
+.catalog-brand-list .catalog-category {
+    margin-bottom: 4px;
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+.catalog-brand-list .catalog-category[hidden],
+.catalog-brand-empty[hidden] {
+    display: none;
+}
+
+.catalog-brand-empty {
+    padding: 16px 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    text-align: center;
 }
 
 .catalog-help {
