@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -23,6 +24,7 @@ public class AuctionAccessGuard {
     private final Map<String, LocalDate> verifiedClients = new ConcurrentHashMap<>();
     private final Map<String, CaptchaChallenge> challenges = new ConcurrentHashMap<>();
 
+    @Autowired
     public AuctionAccessGuard(AuctionProperties properties) {
         this(properties, Clock.systemDefaultZone());
     }
