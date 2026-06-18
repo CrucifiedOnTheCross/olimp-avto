@@ -2,6 +2,8 @@ package ru.olimpavto.auctions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -99,11 +102,11 @@ public class AuctionClient {
                 + "&sql=" + encode(sql));
 
         try {
-            String body = restClient.get()
+            byte[] body = restClient.get()
                     .uri(uri)
                     .retrieve()
-                    .body(String.class);
-            return parseLots(body);
+                    .body(byte[].class);
+            return parseLots(decodeBody(body));
         } catch (RestClientException exception) {
             throw new AuctionApiException("API аукционов временно недоступен", exception);
         }
@@ -126,11 +129,11 @@ public class AuctionClient {
                 + "&sql=" + encode(sql));
 
         try {
-            String body = restClient.get()
+            byte[] body = restClient.get()
                     .uri(uri)
                     .retrieve()
-                    .body(String.class);
-            List<Map<String, String>> rows = parseRows(body);
+                    .body(byte[].class);
+            List<Map<String, String>> rows = parseRows(decodeBody(body));
             rawCache.put(cacheKey, new RawCacheEntry(rows, Instant.now()));
             return rows;
         } catch (RestClientException exception) {
@@ -140,6 +143,20 @@ public class AuctionClient {
 
     private List<AuctionLot> parseLots(String body) {
         return parseRows(body).stream().map(this::toLot).toList();
+    }
+
+    private String decodeBody(byte[] body) {
+        if (body == null || body.length == 0) {
+            return "";
+        }
+        if (body.length >= 2 && (body[0] & 0xff) == 0x1f && (body[1] & 0xff) == 0x8b) {
+            try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(body))) {
+                return new String(gzip.readAllBytes(), StandardCharsets.UTF_8);
+            } catch (IOException exception) {
+                throw new AuctionApiException("API аукционов вернул поврежденный gzip-ответ", exception);
+            }
+        }
+        return new String(body, StandardCharsets.UTF_8);
     }
 
     private List<Map<String, String>> parseRows(String body) {
