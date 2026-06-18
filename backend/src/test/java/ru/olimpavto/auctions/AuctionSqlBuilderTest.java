@@ -20,7 +20,8 @@ class AuctionSqlBuilderTest {
                 80_000,
                 "125",
                 1,
-                500
+                500,
+                24
         ));
 
         assertThat(sql).contains("model_name like '%Prius'' or ''1''=''1%'");
@@ -30,7 +31,7 @@ class AuctionSqlBuilderTest {
         assertThat(sql).contains("year >= 2020");
         assertThat(sql).contains("year <= 2024");
         assertThat(sql).contains("mileage <= 80000");
-        assertThat(sql).endsWith("limit 50");
+        assertThat(sql).endsWith("limit 24,50");
     }
 
     @Test

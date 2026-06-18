@@ -138,6 +138,8 @@ src/main/resources/application.yml
 | `AVTOJP_LOT_CACHE_TTL` | кеш уже открытого полного лота | `10m` |
 | `AVTOJP_CAPTCHA_THRESHOLD` | число открытий лотов с одного IP до проверки | `50` |
 | `AVTOJP_CAPTCHA_TTL` | срок действия проверочного вопроса | `5m` |
+| `AVTOJP_REQUEST_THRESHOLD` | число аукционных API-запросов с одного IP за окно | `40` |
+| `AVTOJP_REQUEST_WINDOW` | окно ограничения частоты запросов | `1m` |
 
 ## Аукционы
 

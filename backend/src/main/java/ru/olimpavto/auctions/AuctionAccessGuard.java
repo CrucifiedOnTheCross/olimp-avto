@@ -21,6 +21,7 @@ public class AuctionAccessGuard {
     private final AuctionProperties properties;
     private final Clock clock;
     private final Map<String, AtomicInteger> dailyViews = new ConcurrentHashMap<>();
+    private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
     private final Map<String, LocalDate> verifiedClients = new ConcurrentHashMap<>();
     private final Map<String, CaptchaChallenge> challenges = new ConcurrentHashMap<>();
 
@@ -48,15 +49,25 @@ public class AuctionAccessGuard {
             return;
         }
 
-        int left = ThreadLocalRandom.current().nextInt(2, 10);
-        int right = ThreadLocalRandom.current().nextInt(2, 10);
-        String id = UUID.randomUUID().toString();
-        challenges.put(id, new CaptchaChallenge(
-                client,
-                left + right,
-                Instant.now(clock).plus(properties.getCaptchaTtl())
-        ));
-        throw new AuctionCaptchaRequiredException(id, left + " + " + right + " = ?");
+        throw challenge(client);
+    }
+
+    public void checkRequest() {
+        cleanup();
+        String client = clientAddress();
+        LocalDate today = LocalDate.now(clock);
+        if (today.equals(verifiedClients.get(client))) {
+            return;
+        }
+
+        long windowMillis = Math.max(1, properties.getRequestWindow().toMillis());
+        long bucket = Instant.now(clock).toEpochMilli() / windowMillis;
+        int requests = requestCounts
+                .computeIfAbsent(client + '|' + bucket, ignored -> new AtomicInteger())
+                .incrementAndGet();
+        if (requests > properties.getRequestThreshold()) {
+            throw challenge(client);
+        }
     }
 
     public void verify(String captchaId, int answer) {
@@ -94,6 +105,20 @@ public class AuctionAccessGuard {
         challenges.entrySet().removeIf(entry -> entry.getValue().expiresAt().isBefore(now));
         verifiedClients.entrySet().removeIf(entry -> !entry.getValue().equals(today));
         dailyViews.keySet().removeIf(key -> !key.endsWith("|" + today));
+        long currentBucket = now.toEpochMilli() / Math.max(1, properties.getRequestWindow().toMillis());
+        requestCounts.keySet().removeIf(key -> !key.endsWith("|" + currentBucket));
+    }
+
+    private AuctionCaptchaRequiredException challenge(String client) {
+        int left = ThreadLocalRandom.current().nextInt(2, 10);
+        int right = ThreadLocalRandom.current().nextInt(2, 10);
+        String id = UUID.randomUUID().toString();
+        challenges.put(id, new CaptchaChallenge(
+                client,
+                left + right,
+                Instant.now(clock).plus(properties.getCaptchaTtl())
+        ));
+        return new AuctionCaptchaRequiredException(id, left + " + " + right + " = ?");
     }
 
     private record CaptchaChallenge(String client, int answer, Instant expiresAt) {

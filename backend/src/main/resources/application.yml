@@ -41,6 +41,8 @@ app:
     lot-cache-ttl: ${AVTOJP_LOT_CACHE_TTL:10m}
     captcha-threshold: ${AVTOJP_CAPTCHA_THRESHOLD:50}
     captcha-ttl: ${AVTOJP_CAPTCHA_TTL:5m}
+    request-threshold: ${AVTOJP_REQUEST_THRESHOLD:40}
+    request-window: ${AVTOJP_REQUEST_WINDOW:1m}
   security:
     admin-username: ${APP_ADMIN_USERNAME:admin}
     admin-password: ${APP_ADMIN_PASSWORD:admin123}

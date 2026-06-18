@@ -18,4 +18,6 @@ public class AuctionProperties {
     private Duration lotCacheTtl = Duration.ofMinutes(10);
     private int captchaThreshold = 50;
     private Duration captchaTtl = Duration.ofMinutes(5);
+    private int requestThreshold = 40;
+    private Duration requestWindow = Duration.ofMinutes(1);
 }

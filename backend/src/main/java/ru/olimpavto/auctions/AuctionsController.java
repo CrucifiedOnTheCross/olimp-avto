@@ -45,9 +45,11 @@ public class AuctionsController implements AuctionsApiDelegate {
             Integer maxMileage,
             String lotNumber,
             Integer dayOfWeek,
-            Integer limit
+            Integer limit,
+            Integer offset
     ) {
-        validateSearch(yearFrom, yearTo, dayOfWeek, limit);
+        accessGuard.checkRequest();
+        validateSearch(yearFrom, yearTo, dayOfWeek, limit, offset);
         return ResponseEntity.ok(auctionClient.search(new AuctionSearchCriteria(
                 source(source),
                 query,
@@ -58,12 +60,14 @@ public class AuctionsController implements AuctionsApiDelegate {
                 maxMileage,
                 lotNumber,
                 dayOfWeek,
-                limit
+                limit,
+                offset
         )));
     }
 
     @Override
     public ResponseEntity<AuctionLot> getAuctionLot(String id, String source) {
+        accessGuard.checkRequest();
         accessGuard.checkLotView();
         AuctionLot lot = auctionClient.getLot(source(source), id);
         if (lot == null) {
@@ -74,11 +78,13 @@ public class AuctionsController implements AuctionsApiDelegate {
 
     @Override
     public ResponseEntity<java.util.List<String>> listAuctionManufacturers(String source) {
+        accessGuard.checkRequest();
         return ResponseEntity.ok(auctionClient.manufacturers(source(source)));
     }
 
     @Override
     public ResponseEntity<java.util.List<String>> listAuctionModels(String source, String manufacturer) {
+        accessGuard.checkRequest();
         if (manufacturer == null || manufacturer.isBlank()) {
             throw new BadRequestException("Не выбрана марка", Map.of("manufacturer", "Выберите марку"));
         }
@@ -111,13 +117,22 @@ public class AuctionsController implements AuctionsApiDelegate {
                 .body(new FormResponse("Заявка по аукционному лоту отправлена"));
     }
 
-    private void validateSearch(Integer yearFrom, Integer yearTo, Integer dayOfWeek, Integer limit) {
+    private void validateSearch(
+            Integer yearFrom,
+            Integer yearTo,
+            Integer dayOfWeek,
+            Integer limit,
+            Integer offset
+    ) {
         Map<String, String> fields = new LinkedHashMap<>();
         if (yearFrom != null && yearTo != null && yearFrom > yearTo) {
             fields.put("yearFrom", "Год от не может быть больше года до");
         }
         if (limit != null && (limit < 1 || limit > 50)) {
             fields.put("limit", "Можно запросить от 1 до 50 лотов");
+        }
+        if (offset != null && (offset < 0 || offset > 1000)) {
+            fields.put("offset", "Смещение должно быть от 0 до 1000");
         }
         if (dayOfWeek != null && (dayOfWeek < 1 || dayOfWeek > 7)) {
             fields.put("dayOfWeek", "Выберите день недели");

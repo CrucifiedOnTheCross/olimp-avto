@@ -49,10 +49,14 @@ class AuctionsControllerTest {
 
     @Test
     void searchRejectsInvalidYearRange() {
-        AuctionsController searchController = new AuctionsController(new FakeAuctionClient(), leadsController, null);
+        AuctionsController searchController = new AuctionsController(
+                new FakeAuctionClient(),
+                leadsController,
+                new AuctionAccessGuard(new AuctionProperties())
+        );
 
         assertThatThrownBy(() -> searchController.searchAuctions(
-                "japan", null, null, null, 2025, 2020, null, null, null, 20
+                "japan", null, null, null, 2025, 2020, null, null, null, 20, 0
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Проверьте параметры поиска");

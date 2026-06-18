@@ -33,8 +33,13 @@ public class AuctionSqlBuilder {
             where.add("dayofweek(auction_date) = " + apiDay);
         }
 
-        return "select * from %s where %s order by auction_date desc limit %d"
-                .formatted(criteria.source().table(), String.join(" and ", where), limit(criteria.limit()));
+        return "select * from %s where %s order by auction_date desc limit %d,%d"
+                .formatted(
+                        criteria.source().table(),
+                        String.join(" and ", where),
+                        offset(criteria.offset()),
+                        limit(criteria.limit())
+                );
     }
 
     public String lotSql(AuctionSource source, String id) {
@@ -70,6 +75,10 @@ public class AuctionSqlBuilder {
             return DEFAULT_LIMIT;
         }
         return Math.max(1, Math.min(requestedLimit, MAX_LIMIT));
+    }
+
+    private int offset(Integer requestedOffset) {
+        return requestedOffset == null ? 0 : Math.max(0, Math.min(requestedOffset, 1000));
     }
 
     private String escape(String value) {

@@ -44,4 +44,19 @@ class AuctionAccessGuardTest {
         assertThatThrownBy(() -> guard.verify(challenge.getFields().get("captchaId"), answer))
                 .isInstanceOf(ru.olimpavto.common.BadRequestException.class);
     }
+
+    @Test
+    void requiresCaptchaAfterTooManyRequestsInOneWindow() {
+        AuctionProperties properties = new AuctionProperties();
+        properties.setRequestThreshold(1);
+        Clock clock = Clock.fixed(Instant.parse("2026-06-18T10:00:00Z"), ZoneOffset.UTC);
+        AuctionAccessGuard guard = new AuctionAccessGuard(properties, clock);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Real-IP", "203.0.113.8");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        assertThatCode(guard::checkRequest).doesNotThrowAnyException();
+        assertThatThrownBy(guard::checkRequest)
+                .isInstanceOf(AuctionCaptchaRequiredException.class);
+    }
 }

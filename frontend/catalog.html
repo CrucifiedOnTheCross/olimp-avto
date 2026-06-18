@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
-    <link rel="stylesheet" href="style.css?v=20260618-2">
+    <link rel="stylesheet" href="style.css?v=20260618-3">
 </head>
 <body>
 
@@ -108,6 +108,10 @@
 
                         <div class="catalog-grid" id="catalogGrid"></div>
 
+                        <button class="catalog-load-more" id="catalogLoadMore" type="button" hidden>
+                            Показать ещё
+                        </button>
+
                         <div class="catalog-empty" id="catalogEmpty" hidden>
                             В этой категории сейчас нет активных лотов. Перейдите в поиск аукционов или оставьте заявку на подбор.
                         </div>
@@ -203,6 +207,22 @@
     </section>
 </main>
 
+<div class="rate-captcha-modal" id="rateCaptchaModal" role="dialog" aria-modal="true"
+     aria-labelledby="rateCaptchaTitle">
+    <div class="rate-captcha-box">
+        <button class="rate-captcha-close" id="rateCaptchaClose" type="button" aria-label="Закрыть">×</button>
+        <span>Защита от автоматических запросов</span>
+        <h2 id="rateCaptchaTitle">Подтвердите, что вы человек</h2>
+        <p>Решите простой пример, и просмотр автомобилей продолжится.</p>
+        <strong id="rateCaptchaQuestion"></strong>
+        <input type="number" id="rateCaptchaAnswer" min="0" max="1000" inputmode="numeric"
+               aria-label="Ответ на пример">
+        <input type="hidden" id="rateCaptchaId">
+        <button class="rate-captcha-verify" id="rateCaptchaVerify" type="button">Продолжить просмотр</button>
+        <div class="rate-captcha-error" id="rateCaptchaError" role="status"></div>
+    </div>
+</div>
+
 <div class="car-modal" id="carModal">
     <div class="car-modal-box">
         <button class="car-modal-close" id="carModalClose">×</button>
@@ -254,7 +274,11 @@
         </label>
         <label class="privacy-check">
             <input type="checkbox" name="policyAccepted" required>
-            <span>Согласен на обработку персональных данных</span>
+            <span class="privacy-check-box" aria-hidden="true"></span>
+            <span>
+                Согласен на обработку персональных данных
+                в соответствии с <a href="#">политикой конфиденциальности</a>
+            </span>
         </label>
         <button type="submit">Отправить заявку</button>
     </form>
@@ -348,7 +372,7 @@
 </footer>
 
 <script src="config.js"></script>
-<script src="scripts.js?v=20260618-2"></script>
+<script src="scripts.js?v=20260618-3"></script>
 
 </body>
 </html>

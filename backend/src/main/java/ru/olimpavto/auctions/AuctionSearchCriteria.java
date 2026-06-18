@@ -10,6 +10,7 @@ public record AuctionSearchCriteria(
         Integer maxMileage,
         String lotNumber,
         Integer dayOfWeek,
-        Integer limit
+        Integer limit,
+        Integer offset
 ) {
 }

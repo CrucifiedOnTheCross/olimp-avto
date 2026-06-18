@@ -427,12 +427,24 @@ window.addEventListener('DOMContentLoaded', () => {
     const catalogFilterList = document.getElementById('catalogFilterList');
     const catalogGrid = document.getElementById('catalogGrid');
     const catalogEmpty = document.getElementById('catalogEmpty');
+    const catalogLoadMore = document.getElementById('catalogLoadMore');
+    const rateCaptchaModal = document.getElementById('rateCaptchaModal');
+    const rateCaptchaClose = document.getElementById('rateCaptchaClose');
+    const rateCaptchaQuestion = document.getElementById('rateCaptchaQuestion');
+    const rateCaptchaAnswer = document.getElementById('rateCaptchaAnswer');
+    const rateCaptchaId = document.getElementById('rateCaptchaId');
+    const rateCaptchaVerify = document.getElementById('rateCaptchaVerify');
+    const rateCaptchaError = document.getElementById('rateCaptchaError');
     let catalogCars = [];
     let catalogFilter = { type: 'all', value: 'all' };
+    let catalogLoading = false;
+    let rateCaptchaRetry = null;
+    const catalogBatchSize = 4;
+    const catalogMaxCars = 96;
     const popularAuctionSources = [
-        { value: 'japan', country: 'Япония', currency: '¥' },
-        { value: 'korea', country: 'Корея', currency: '₩' },
-        { value: 'china', country: 'Китай', currency: '¥' }
+        { value: 'japan', country: 'Япония', currency: '¥', offset: 0, done: false },
+        { value: 'korea', country: 'Корея', currency: '₩', offset: 0, done: false },
+        { value: 'china', country: 'Китай', currency: '¥', offset: 0, done: false }
     ];
 
     function setCatalogMode(mode) {
@@ -473,15 +485,18 @@ window.addEventListener('DOMContentLoaded', () => {
         const countries = Array.isArray(filters?.countries) ? filters.countries : [];
         const manufacturers = Array.isArray(filters?.manufacturers) ? filters.manufacturers : [];
         catalogFilterList.innerHTML = `
-            <button class="catalog-category active" data-filter-type="all" data-filter-value="all">Все</button>
+            <button class="catalog-category ${catalogFilter.type === 'all' ? 'active' : ''}"
+                    data-filter-type="all" data-filter-value="all">Все</button>
             ${countries.map(country => `
-                <button class="catalog-category" data-filter-type="country" data-filter-value="${escapeHtml(country)}">
+                <button class="catalog-category ${catalogFilter.type === 'country' && catalogFilter.value === country ? 'active' : ''}"
+                        data-filter-type="country" data-filter-value="${escapeHtml(country)}">
                     ${escapeHtml(country)}
                 </button>
             `).join('')}
             ${manufacturers.length ? `<div class="catalog-filter-subtitle">Марки автомобилей</div>` : ''}
             ${manufacturers.map(manufacturer => `
-                <button class="catalog-category" data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
+                <button class="catalog-category ${catalogFilter.type === 'manufacturer' && catalogFilter.value === manufacturer ? 'active' : ''}"
+                        data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
                     ${escapeHtml(manufacturer)}
                 </button>
             `).join('')}
@@ -550,16 +565,56 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadCatalogData() {
-        if (!catalogGrid || !catalogFilterList) return;
+    function catalogFilters() {
+        return {
+            countries: [...new Set(catalogCars.map(car => car.country))],
+            manufacturers: [...new Set(catalogCars.map(car => car.manufacturer))].sort()
+        };
+    }
 
-        catalogGrid.innerHTML = '<div class="catalog-loading">Загружаем актуальные предложения...</div>';
+    function showRateCaptcha(fields, retry) {
+        if (!rateCaptchaModal || !rateCaptchaQuestion || !rateCaptchaId) return;
+        rateCaptchaQuestion.textContent = fields?.captchaQuestion || 'Решите пример';
+        rateCaptchaId.value = fields?.captchaId || '';
+        rateCaptchaRetry = retry;
+        if (rateCaptchaAnswer) rateCaptchaAnswer.value = '';
+        if (rateCaptchaError) rateCaptchaError.textContent = '';
+        rateCaptchaModal.classList.add('active');
+        rateCaptchaAnswer?.focus();
+    }
+
+    async function loadMoreCatalogCars() {
+        if (!catalogGrid || !catalogFilterList || catalogLoading || catalogCars.length >= catalogMaxCars) return;
+
+        const activeSources = popularAuctionSources.filter(source => !source.done);
+        if (!activeSources.length) {
+            if (catalogLoadMore) catalogLoadMore.hidden = true;
+            return;
+        }
+
+        catalogLoading = true;
+        if (catalogLoadMore) {
+            catalogLoadMore.hidden = false;
+            catalogLoadMore.disabled = true;
+            catalogLoadMore.textContent = 'Загружаем ещё автомобили...';
+        }
         try {
-            const responses = await Promise.allSettled(popularAuctionSources.map(async source => {
-                const response = await fetch(`${API_BASE}/api/auctions/search?source=${source.value}&limit=3`);
-                if (!response.ok) throw new Error('Источник временно недоступен');
+            const responses = await Promise.allSettled(activeSources.map(async source => {
+                const response = await fetch(
+                    `${API_BASE}/api/auctions/search?source=${source.value}&limit=${catalogBatchSize}&offset=${source.offset}`
+                );
+                if (!response.ok) {
+                    const payload = await response.json().catch(() => ({}));
+                    const error = new Error(payload.message || 'Источник временно недоступен');
+                    error.status = response.status;
+                    error.fields = payload.fields;
+                    throw error;
+                }
                 const payload = await response.json();
-                return (Array.isArray(payload.items) ? payload.items : []).map(lot => ({
+                const items = Array.isArray(payload.items) ? payload.items : [];
+                source.offset += catalogBatchSize;
+                source.done = items.length < catalogBatchSize;
+                return items.map(lot => ({
                     id: lot.id,
                     source: source.value,
                     country: source.country,
@@ -575,23 +630,41 @@ window.addEventListener('DOMContentLoaded', () => {
                 }));
             }));
 
-            catalogCars = responses
+            const newCars = responses
                 .filter(result => result.status === 'fulfilled')
                 .flatMap(result => result.value);
+            const captchaFailure = responses.find(result => result.status === 'rejected' && result.reason?.status === 429);
+            if (captchaFailure) {
+                showRateCaptcha(captchaFailure.reason.fields, loadMoreCatalogCars);
+            }
+            const known = new Set(catalogCars.map(car => `${car.source}:${car.id}`));
+            catalogCars.push(...newCars.filter(car => !known.has(`${car.source}:${car.id}`)));
             if (!catalogCars.length) throw new Error('Нет доступных предложений');
 
-            renderCatalogFilters({
-                countries: [...new Set(catalogCars.map(car => car.country))],
-                manufacturers: [...new Set(catalogCars.map(car => car.manufacturer))].sort()
-            });
+            renderCatalogFilters(catalogFilters());
             renderCatalogCars(catalogCars);
         } catch {
-            catalogGrid.innerHTML = '';
-            if (catalogEmpty) {
+            if (!catalogCars.length && catalogEmpty) {
+                catalogGrid.innerHTML = '';
                 catalogEmpty.textContent = 'Готовые варианты временно недоступны. Оставьте заявку, менеджер подберёт автомобиль вручную.';
                 catalogEmpty.hidden = false;
             }
+        } finally {
+            catalogLoading = false;
+            if (catalogLoadMore) {
+                const hasMore = catalogCars.length < catalogMaxCars
+                    && popularAuctionSources.some(source => !source.done);
+                catalogLoadMore.hidden = !hasMore;
+                catalogLoadMore.disabled = false;
+                catalogLoadMore.textContent = hasMore ? 'Показать ещё' : 'Все предложения загружены';
+            }
         }
+    }
+
+    function loadCatalogData() {
+        if (!catalogGrid || !catalogFilterList) return;
+        catalogGrid.innerHTML = '<div class="catalog-loading">Загружаем актуальные предложения...</div>';
+        loadMoreCatalogCars();
     }
 
     if (
@@ -633,6 +706,51 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     loadCatalogData();
+
+    if (catalogLoadMore) {
+        catalogLoadMore.addEventListener('click', loadMoreCatalogCars);
+        if ('IntersectionObserver' in window) {
+            const catalogObserver = new IntersectionObserver(entries => {
+                if (entries.some(entry => entry.isIntersecting)) {
+                    loadMoreCatalogCars();
+                }
+            }, { rootMargin: '500px 0px' });
+            catalogObserver.observe(catalogLoadMore);
+        }
+    }
+
+    if (rateCaptchaClose && rateCaptchaModal) {
+        rateCaptchaClose.addEventListener('click', () => rateCaptchaModal.classList.remove('active'));
+    }
+
+    if (rateCaptchaVerify) {
+        rateCaptchaVerify.addEventListener('click', async () => {
+            const answer = Number(rateCaptchaAnswer?.value);
+            if (!rateCaptchaId?.value || !Number.isInteger(answer)) {
+                if (rateCaptchaError) rateCaptchaError.textContent = 'Введите ответ на пример.';
+                rateCaptchaAnswer?.focus();
+                return;
+            }
+            rateCaptchaVerify.disabled = true;
+            if (rateCaptchaError) rateCaptchaError.textContent = '';
+            try {
+                const response = await fetch(`${API_BASE}/api/auctions/captcha/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ captchaId: rateCaptchaId.value, answer })
+                });
+                if (!response.ok) throw new Error(await parseApiMessage(response));
+                rateCaptchaModal?.classList.remove('active');
+                const retry = rateCaptchaRetry;
+                rateCaptchaRetry = null;
+                if (retry) await retry();
+            } catch (error) {
+                if (rateCaptchaError) rateCaptchaError.textContent = error.message;
+            } finally {
+                rateCaptchaVerify.disabled = false;
+            }
+        });
+    }
 
     const auctionSearchForm = document.getElementById('auctionSearchForm');
     const auctionRefresh = document.getElementById('auctionRefresh');
@@ -881,6 +999,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await fetch(`${API_BASE}/api/auctions/search?${params.toString()}`);
+            if (response.status === 429) {
+                const payload = await response.json().catch(() => ({}));
+                showRateCaptcha(payload.fields, searchAuctions);
+                setAuctionState('Подтвердите, что вы человек, чтобы продолжить поиск.');
+                return;
+            }
             if (!response.ok) {
                 const message = await parseApiMessage(response);
                 throw new Error(message.includes('API-код')

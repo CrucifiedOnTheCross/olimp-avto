@@ -3531,6 +3531,35 @@ body {
     background: rgba(20, 8, 9, 0.72);
 }
 
+.catalog-load-more {
+    width: min(420px, 100%);
+    min-height: 50px;
+    margin: 28px auto 0;
+    display: block;
+    border: 1px solid rgba(224, 162, 54, 0.44);
+    border-radius: 8px;
+    background: rgba(224, 162, 54, 0.1);
+    color: #f4b13d;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.catalog-load-more:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #d88916;
+    color: #fff;
+}
+
+.catalog-load-more:disabled {
+    cursor: wait;
+    opacity: 0.78;
+}
+
+.catalog-load-more[hidden] {
+    display: none;
+}
+
 .auction-search-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3729,6 +3758,153 @@ body {
     border-radius: 26px;
     border: 1px solid rgba(244, 177, 61, 0.32);
     background: #1b0808;
+}
+
+.auction-lead-box .privacy-check {
+    position: relative;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    align-items: start;
+    gap: 11px;
+    padding: 12px 14px;
+    border: 1px solid rgba(244, 177, 61, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.45;
+    cursor: pointer;
+}
+
+.auction-lead-box .privacy-check input {
+    position: absolute;
+    width: 1px;
+    min-height: 1px;
+    margin: 0;
+    opacity: 0;
+}
+
+.privacy-check-box {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(244, 177, 61, 0.64);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.28);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.privacy-check input:checked + .privacy-check-box {
+    border-color: #e0a236;
+    background: #d88916;
+}
+
+.privacy-check input:checked + .privacy-check-box::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 11px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.privacy-check input:focus-visible + .privacy-check-box {
+    box-shadow: 0 0 0 4px rgba(224, 162, 54, 0.2);
+}
+
+.privacy-check a {
+    color: #f4b13d;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.rate-captcha-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.82);
+}
+
+.rate-captcha-modal.active {
+    display: grid;
+}
+
+.rate-captcha-box {
+    position: relative;
+    width: min(430px, 100%);
+    display: grid;
+    gap: 14px;
+    padding: 28px;
+    border: 1px solid rgba(244, 177, 61, 0.42);
+    border-radius: 8px;
+    background: #1b0808;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.72);
+}
+
+.rate-captcha-box > span {
+    color: #f4b13d;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rate-captcha-box h2,
+.rate-captcha-box p {
+    margin: 0;
+}
+
+.rate-captcha-box p {
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.5;
+}
+
+.rate-captcha-box strong {
+    font-size: 24px;
+}
+
+.rate-captcha-box input {
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid rgba(244, 177, 61, 0.36);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.34);
+    color: #fff;
+    font: inherit;
+}
+
+.rate-captcha-verify {
+    min-height: 48px;
+    border: 0;
+    border-radius: 8px;
+    background: #d88916;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rate-captcha-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.rate-captcha-error {
+    min-height: 18px;
+    color: #ffb8bb;
+    font-size: 12px;
 }
 
 .auction-lot-details {
