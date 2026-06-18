@@ -14,9 +14,10 @@ public class AuctionSqlBuilder {
         List<String> where = new ArrayList<>();
         where.add("1=1");
 
-        addLike(where, "model_name", criteria.query());
+        addSearch(where, criteria.query());
         addLike(where, "marka_name", criteria.manufacturer());
         addLike(where, "model_name", criteria.model());
+        addLike(where, "lot", criteria.lotNumber());
 
         if (criteria.yearFrom() != null) {
             where.add("year >= " + criteria.yearFrom());
@@ -27,13 +28,35 @@ public class AuctionSqlBuilder {
         if (criteria.maxMileage() != null) {
             where.add("mileage <= " + criteria.maxMileage());
         }
+        if (criteria.dayOfWeek() != null) {
+            int apiDay = criteria.dayOfWeek() == 7 ? 1 : criteria.dayOfWeek() + 1;
+            where.add("dayofweek(auction_date) = " + apiDay);
+        }
 
-        return "select * from main where %s order by auction_date desc limit %d"
-                .formatted(String.join(" and ", where), limit(criteria.limit()));
+        return "select * from %s where %s order by auction_date desc limit %d"
+                .formatted(criteria.source().table(), String.join(" and ", where), limit(criteria.limit()));
     }
 
-    public String lotSql(String id) {
-        return "select * from main where id = '%s' limit 1".formatted(escape(id));
+    public String lotSql(AuctionSource source, String id) {
+        return "select * from %s where id = '%s' limit 1".formatted(source.table(), escape(id));
+    }
+
+    public String manufacturersSql(AuctionSource source) {
+        return "select distinct marka_name from %s order by marka_name".formatted(source.table());
+    }
+
+    public String modelsSql(AuctionSource source, String manufacturer) {
+        return "select distinct model_name from %s where marka_name = '%s' order by model_name"
+                .formatted(source.table(), escape(manufacturer));
+    }
+
+    private void addSearch(List<String> where, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        String escaped = escape(value.trim());
+        where.add("(marka_name like '%%%1$s%%' or model_name like '%%%1$s%%' or lot like '%%%1$s%%')"
+                .formatted(escaped));
     }
 
     private void addLike(List<String> where, String field, String value) {

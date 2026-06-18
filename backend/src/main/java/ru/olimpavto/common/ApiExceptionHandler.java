@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import ru.olimpavto.auctions.AuctionApiException;
+import ru.olimpavto.auctions.AuctionCaptchaRequiredException;
 import ru.olimpavto.dto.ErrorResponse;
 
 @RestControllerAdvice
@@ -66,6 +67,14 @@ public class ApiExceptionHandler {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(exception.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @ExceptionHandler(AuctionCaptchaRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleAuctionCaptcha(AuctionCaptchaRequiredException exception) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(exception.getMessage());
+        response.setFields(exception.getFields());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
     }
 
     @ExceptionHandler(Exception.class)

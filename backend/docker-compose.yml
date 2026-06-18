@@ -30,10 +30,14 @@ services:
       APP_ADMIN_USERNAME: admin
       APP_ADMIN_PASSWORD: admin123
       APP_PUBLIC_BASE_URL: https://olimpavtovl.ru
-      AVTOJP_API_URL: http://78.46.90.228/gzip/
-      AVTOJP_API_CODE: ""
-      AVTOJP_TIMEOUT: 5s
-      AVTOJP_CACHE_TTL: 10m
+      AVTOJP_API_URL: ${AVTOJP_API_URL:-http://87.242.72.57/gzip/}
+      AVTOJP_API_IP: ${AVTOJP_API_IP:-8.1.1.1}
+      AVTOJP_API_CODE: ${AVTOJP_API_CODE:-}
+      AVTOJP_TIMEOUT: ${AVTOJP_TIMEOUT:-20s}
+      AVTOJP_DICTIONARY_CACHE_TTL: ${AVTOJP_DICTIONARY_CACHE_TTL:-30m}
+      AVTOJP_LOT_CACHE_TTL: ${AVTOJP_LOT_CACHE_TTL:-10m}
+      AVTOJP_CAPTCHA_THRESHOLD: ${AVTOJP_CAPTCHA_THRESHOLD:-50}
+      AVTOJP_CAPTCHA_TTL: ${AVTOJP_CAPTCHA_TTL:-5m}
     depends_on:
       postgres:
         condition: service_healthy

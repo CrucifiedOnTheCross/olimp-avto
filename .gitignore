@@ -8,6 +8,7 @@ backend/out/
 backend/*.log
 backend/.idea/
 backend/*.iml
+backend/.env
 
 __pycache__/
 .DS_Store

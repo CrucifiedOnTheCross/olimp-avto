@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
-    <link rel="stylesheet" href="style.css?v=20260613">
+    <link rel="stylesheet" href="style.css?v=20260618">
 </head>
 <body>
 
@@ -120,6 +120,14 @@
                     <form class="auction-search" id="auctionSearchForm">
                         <h2>Поиск лотов</h2>
                         <label>
+                            Страна аукциона
+                            <select name="source" id="auctionSource">
+                                <option value="japan">Япония</option>
+                                <option value="korea">Корея</option>
+                                <option value="china">Китай</option>
+                            </select>
+                        </label>
+                        <label>
                             Быстрый поиск
                             <input type="search" name="query" placeholder="Например, Toyota Prius">
                         </label>
@@ -149,6 +157,25 @@
                             Пробег до, км
                             <input type="number" name="maxMileage" min="1" placeholder="80000">
                         </label>
+                        <div class="auction-search-row">
+                            <label>
+                                Номер лота
+                                <input type="text" name="lotNumber" maxlength="40" placeholder="Например, 1256">
+                            </label>
+                            <label>
+                                День торгов
+                                <select name="dayOfWeek">
+                                    <option value="">Любой день</option>
+                                    <option value="1">Понедельник</option>
+                                    <option value="2">Вторник</option>
+                                    <option value="3">Среда</option>
+                                    <option value="4">Четверг</option>
+                                    <option value="5">Пятница</option>
+                                    <option value="6">Суббота</option>
+                                    <option value="7">Воскресенье</option>
+                                </select>
+                            </label>
+                        </div>
                         <button type="submit">Найти лоты</button>
                         <p class="auction-note">
                             Найдите подходящий лот, а менеджер поможет проверить автомобиль и рассчитать доставку.
@@ -158,7 +185,7 @@
                     <div class="auction-results">
                         <div class="auction-results-top">
                             <div>
-                                <span>Аукционы Японии</span>
+                                <span id="auctionResultsSource">Аукционы Японии</span>
                                 <h2>Живые лоты</h2>
                             </div>
                             <button class="auction-refresh" id="auctionRefresh" type="button">Обновить</button>
@@ -198,6 +225,19 @@
         <button class="auction-lead-close" id="auctionLeadClose" type="button">×</button>
         <span>Заявка по лоту</span>
         <h2 id="auctionLeadTitle">Аукционный лот</h2>
+        <div class="auction-lot-details" id="auctionLotDetails" hidden>
+            <div class="auction-lot-gallery" id="auctionLotGallery"></div>
+            <dl class="auction-lot-facts" id="auctionLotFacts"></dl>
+        </div>
+        <div class="auction-captcha" id="auctionCaptcha" hidden>
+            <strong>Подтвердите, что вы не робот</strong>
+            <p id="auctionCaptchaQuestion"></p>
+            <div>
+                <input type="number" id="auctionCaptchaAnswer" min="0" max="1000" inputmode="numeric">
+                <button type="button" id="auctionCaptchaVerify">Проверить</button>
+            </div>
+            <input type="hidden" id="auctionCaptchaId">
+        </div>
         <input type="hidden" name="lotId" id="auctionLeadLotId">
         <input type="hidden" name="lotTitle" id="auctionLeadLotTitle">
         <label>
@@ -308,7 +348,7 @@
 </footer>
 
 <script src="config.js"></script>
-<script src="scripts.js?v=20260613-3"></script>
+<script src="scripts.js?v=20260618"></script>
 
 </body>
 </html>

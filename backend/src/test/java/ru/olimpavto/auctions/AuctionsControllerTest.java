@@ -14,7 +14,7 @@ import ru.olimpavto.forms.LeadsController;
 class AuctionsControllerTest {
 
     private final RecordingLeadsController leadsController = new RecordingLeadsController();
-    private final AuctionsController controller = new AuctionsController(null, leadsController);
+    private final AuctionsController controller = new AuctionsController(null, leadsController, null);
 
     @Test
     void sendAuctionLeadStoresLeadWithLotContext() {
@@ -49,9 +49,11 @@ class AuctionsControllerTest {
 
     @Test
     void searchRejectsInvalidYearRange() {
-        AuctionsController searchController = new AuctionsController(new FakeAuctionClient(), leadsController);
+        AuctionsController searchController = new AuctionsController(new FakeAuctionClient(), leadsController, null);
 
-        assertThatThrownBy(() -> searchController.searchAuctions(null, null, null, 2025, 2020, null, 20))
+        assertThatThrownBy(() -> searchController.searchAuctions(
+                "japan", null, null, null, 2025, 2020, null, null, null, 20
+        ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Проверьте параметры поиска");
     }

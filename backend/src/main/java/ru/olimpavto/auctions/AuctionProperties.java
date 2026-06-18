@@ -10,8 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.auctions")
 public class AuctionProperties {
 
-    private String apiUrl = "http://78.46.90.228/gzip/";
+    private String apiUrl = "http://87.242.72.57/gzip/";
+    private String apiIp = "8.1.1.1";
     private String apiCode = "";
-    private Duration timeout = Duration.ofSeconds(5);
-    private Duration cacheTtl = Duration.ofMinutes(10);
+    private Duration timeout = Duration.ofSeconds(20);
+    private Duration dictionaryCacheTtl = Duration.ofMinutes(30);
+    private Duration lotCacheTtl = Duration.ofMinutes(10);
+    private int captchaThreshold = 50;
+    private Duration captchaTtl = Duration.ofMinutes(5);
 }

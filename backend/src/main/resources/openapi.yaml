@@ -20,6 +20,13 @@ paths:
       operationId: searchAuctions
       summary: Search auction lots through backend proxy
       parameters:
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [japan, korea, china]
+            default: japan
         - name: query
           in: query
           required: false
@@ -58,6 +65,20 @@ paths:
           schema:
             type: integer
             minimum: 1
+        - name: lotNumber
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 40
+        - name: dayOfWeek
+          in: query
+          required: false
+          description: ISO day of week, where 1 is Monday and 7 is Sunday
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 7
         - name: limit
           in: query
           required: false
@@ -84,6 +105,14 @@ paths:
       tags: [auctions]
       operationId: listAuctionManufacturers
       summary: List available auction manufacturers
+      parameters:
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [japan, korea, china]
+            default: japan
       responses:
         '200':
           description: Manufacturers
@@ -105,6 +134,13 @@ paths:
       operationId: listAuctionModels
       summary: List available auction models for manufacturer
       parameters:
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [japan, korea, china]
+            default: japan
         - name: manufacturer
           in: query
           required: true
@@ -146,6 +182,13 @@ paths:
             type: string
             minLength: 1
             maxLength: 80
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [japan, korea, china]
+            default: japan
       responses:
         '200':
           description: Auction lot
@@ -161,6 +204,36 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '503':
           description: External auction API is unavailable or not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Captcha verification is required after repeated lot views
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auctions/captcha/verify:
+    post:
+      tags: [auctions]
+      operationId: verifyAuctionCaptcha
+      summary: Verify anti-scraping captcha and allow lot views until the end of the day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuctionCaptchaRequest'
+      responses:
+        '200':
+          description: Captcha verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormResponse'
+        '400':
+          description: Invalid or expired captcha
           content:
             application/json:
               schema:
@@ -513,12 +586,28 @@ components:
           type: string
         imageUrl:
           type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
         auctionDate:
           type: string
         rawFields:
           type: object
           additionalProperties:
             type: string
+    AuctionCaptchaRequest:
+      type: object
+      required: [captchaId, answer]
+      properties:
+        captchaId:
+          type: string
+          minLength: 10
+          maxLength: 100
+        answer:
+          type: integer
+          minimum: 0
+          maximum: 1000
     LeadResponse:
       allOf:
         - $ref: '#/components/schemas/ConsultationRequest'

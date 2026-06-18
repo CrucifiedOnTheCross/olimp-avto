@@ -129,10 +129,14 @@ src/main/resources/application.yml
 | `APP_ADMIN_USERNAME` | логин администратора | `admin` |
 | `APP_ADMIN_PASSWORD` | пароль администратора | `admin123` |
 | `APP_PUBLIC_BASE_URL` | публичный адрес backend для ссылок модерации в письмах | `http://localhost:8080` |
-| `AVTOJP_API_URL` | адрес внешнего API аукционов | `http://78.46.90.228/gzip/` |
+| `AVTOJP_API_URL` | production-адрес внешнего API аукционов | `http://87.242.72.57/gzip/` |
+| `AVTOJP_API_IP` | IP-параметр, выданный поставщиком API | `8.1.1.1` |
 | `AVTOJP_API_CODE` | код доступа к API аукционов | пусто |
-| `AVTOJP_TIMEOUT` | таймаут внешнего API | `5s` |
-| `AVTOJP_CACHE_TTL` | время кеширования поиска аукционов | `10m` |
+| `AVTOJP_TIMEOUT` | таймаут внешнего API | `20s` |
+| `AVTOJP_DICTIONARY_CACHE_TTL` | кеш списков марок и моделей | `30m` |
+| `AVTOJP_LOT_CACHE_TTL` | кеш уже открытого полного лота | `10m` |
+| `AVTOJP_CAPTCHA_THRESHOLD` | число открытий лотов с одного IP до проверки | `50` |
+| `AVTOJP_CAPTCHA_TTL` | срок действия проверочного вопроса | `5m` |
 
 ## Аукционы
 
@@ -142,7 +146,10 @@ src/main/resources/application.yml
 
 ```text
 GET  /api/auctions/search
+GET  /api/auctions/manufacturers
+GET  /api/auctions/models
 GET  /api/auctions/{id}
+POST /api/auctions/captcha/verify
 POST /api/auctions/leads
 ```
 
@@ -154,7 +161,15 @@ AVTOJP_API_CODE=код-от-поставщика
 
 Если `AVTOJP_API_CODE` не задан, страница аукционов откроется, но поиск вернёт сообщение `API-код аукционов не настроен`.
 
-Backend не принимает SQL от браузера. SQL собирается на сервере из разрешённых полей поиска, ограничивает выдачу максимум 50 лотами и кеширует результаты.
+Backend не принимает SQL от браузера. Источник выбирается только из серверного списка `main`, `korea`, `china`, SQL собирается из разрешённых полей и всегда ограничивает выдачу максимум 50 лотами.
+
+Поисковые выдачи не кешируются и полная база лотов не скачивается. Разрешённый кеш используется только для справочников марок/моделей и полного лота, который посетитель уже открыл по ID. После 50 открытий полных карточек с одного IP backend запрашивает проверочный вопрос; после успешной проверки повторная проверка не требуется до конца дня.
+
+Для Docker Compose создайте рядом с `docker-compose.yml` файл `.env`, который не должен попадать в Git:
+
+```text
+AVTOJP_API_CODE=код-от-поставщика
+```
 
 ## Модерация отзывов
 

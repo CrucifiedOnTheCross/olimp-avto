@@ -10,6 +10,7 @@ import ru.olimpavto.api.AuctionsApiDelegate;
 import ru.olimpavto.common.BadRequestException;
 import ru.olimpavto.common.NotFoundException;
 import ru.olimpavto.dto.AuctionLeadRequest;
+import ru.olimpavto.dto.AuctionCaptchaRequest;
 import ru.olimpavto.dto.AuctionLot;
 import ru.olimpavto.dto.AuctionSearchResponse;
 import ru.olimpavto.dto.ConsultationRequest;
@@ -21,37 +22,50 @@ public class AuctionsController implements AuctionsApiDelegate {
 
     private final AuctionClient auctionClient;
     private final LeadsController leadsController;
+    private final AuctionAccessGuard accessGuard;
 
-    public AuctionsController(AuctionClient auctionClient, LeadsController leadsController) {
+    public AuctionsController(
+            AuctionClient auctionClient,
+            LeadsController leadsController,
+            AuctionAccessGuard accessGuard
+    ) {
         this.auctionClient = auctionClient;
         this.leadsController = leadsController;
+        this.accessGuard = accessGuard;
     }
 
     @Override
     public ResponseEntity<AuctionSearchResponse> searchAuctions(
+            String source,
             String query,
             String manufacturer,
             String model,
             Integer yearFrom,
             Integer yearTo,
             Integer maxMileage,
+            String lotNumber,
+            Integer dayOfWeek,
             Integer limit
     ) {
-        validateSearch(yearFrom, yearTo, limit);
+        validateSearch(yearFrom, yearTo, dayOfWeek, limit);
         return ResponseEntity.ok(auctionClient.search(new AuctionSearchCriteria(
+                source(source),
                 query,
                 manufacturer,
                 model,
                 yearFrom,
                 yearTo,
                 maxMileage,
+                lotNumber,
+                dayOfWeek,
                 limit
         )));
     }
 
     @Override
-    public ResponseEntity<AuctionLot> getAuctionLot(String id) {
-        AuctionLot lot = auctionClient.getLot(id);
+    public ResponseEntity<AuctionLot> getAuctionLot(String id, String source) {
+        accessGuard.checkLotView();
+        AuctionLot lot = auctionClient.getLot(source(source), id);
         if (lot == null) {
             throw new NotFoundException("Лот не найден");
         }
@@ -59,16 +73,22 @@ public class AuctionsController implements AuctionsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<java.util.List<String>> listAuctionManufacturers() {
-        return ResponseEntity.ok(auctionClient.manufacturers());
+    public ResponseEntity<java.util.List<String>> listAuctionManufacturers(String source) {
+        return ResponseEntity.ok(auctionClient.manufacturers(source(source)));
     }
 
     @Override
-    public ResponseEntity<java.util.List<String>> listAuctionModels(String manufacturer) {
+    public ResponseEntity<java.util.List<String>> listAuctionModels(String source, String manufacturer) {
         if (manufacturer == null || manufacturer.isBlank()) {
             throw new BadRequestException("Не выбрана марка", Map.of("manufacturer", "Выберите марку"));
         }
-        return ResponseEntity.ok(auctionClient.models(manufacturer.trim()));
+        return ResponseEntity.ok(auctionClient.models(source(source), manufacturer.trim()));
+    }
+
+    @Override
+    public ResponseEntity<FormResponse> verifyAuctionCaptcha(@Valid AuctionCaptchaRequest request) {
+        accessGuard.verify(request.getCaptchaId(), request.getAnswer());
+        return ResponseEntity.ok(new FormResponse("Проверка пройдена"));
     }
 
     @Override
@@ -91,7 +111,7 @@ public class AuctionsController implements AuctionsApiDelegate {
                 .body(new FormResponse("Заявка по аукционному лоту отправлена"));
     }
 
-    private void validateSearch(Integer yearFrom, Integer yearTo, Integer limit) {
+    private void validateSearch(Integer yearFrom, Integer yearTo, Integer dayOfWeek, Integer limit) {
         Map<String, String> fields = new LinkedHashMap<>();
         if (yearFrom != null && yearTo != null && yearFrom > yearTo) {
             fields.put("yearFrom", "Год от не может быть больше года до");
@@ -99,8 +119,22 @@ public class AuctionsController implements AuctionsApiDelegate {
         if (limit != null && (limit < 1 || limit > 50)) {
             fields.put("limit", "Можно запросить от 1 до 50 лотов");
         }
+        if (dayOfWeek != null && (dayOfWeek < 1 || dayOfWeek > 7)) {
+            fields.put("dayOfWeek", "Выберите день недели");
+        }
         if (!fields.isEmpty()) {
             throw new BadRequestException("Проверьте параметры поиска", fields);
+        }
+    }
+
+    private AuctionSource source(String value) {
+        try {
+            return AuctionSource.fromApiValue(value);
+        } catch (IllegalArgumentException exception) {
+            throw new BadRequestException(
+                    "Неизвестный источник аукционов",
+                    Map.of("source", "Выберите Японию, Корею или Китай")
+            );
         }
     }
 

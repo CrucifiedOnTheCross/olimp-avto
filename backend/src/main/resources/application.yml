@@ -33,10 +33,14 @@ spring:
 app:
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   auctions:
-    api-url: ${AVTOJP_API_URL:http://78.46.90.228/gzip/}
+    api-url: ${AVTOJP_API_URL:http://87.242.72.57/gzip/}
+    api-ip: ${AVTOJP_API_IP:8.1.1.1}
     api-code: ${AVTOJP_API_CODE:}
-    timeout: ${AVTOJP_TIMEOUT:5s}
-    cache-ttl: ${AVTOJP_CACHE_TTL:10m}
+    timeout: ${AVTOJP_TIMEOUT:20s}
+    dictionary-cache-ttl: ${AVTOJP_DICTIONARY_CACHE_TTL:30m}
+    lot-cache-ttl: ${AVTOJP_LOT_CACHE_TTL:10m}
+    captcha-threshold: ${AVTOJP_CAPTCHA_THRESHOLD:50}
+    captcha-ttl: ${AVTOJP_CAPTCHA_TTL:5m}
   security:
     admin-username: ${APP_ADMIN_USERNAME:admin}
     admin-password: ${APP_ADMIN_PASSWORD:admin123}

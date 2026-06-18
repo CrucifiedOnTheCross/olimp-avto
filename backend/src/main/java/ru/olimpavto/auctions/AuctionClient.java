@@ -27,7 +27,7 @@ public class AuctionClient {
     private final AuctionSqlBuilder sqlBuilder;
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
-    private final Map<String, CacheEntry> cache = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, LotCacheEntry> lotCache = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, RawCacheEntry> rawCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     public AuctionClient(
@@ -45,33 +45,31 @@ public class AuctionClient {
 
     public AuctionSearchResponse search(AuctionSearchCriteria criteria) {
         String sql = sqlBuilder.searchSql(criteria);
-        String cacheKey = "search:" + sql;
-        CacheEntry cached = cache.get(cacheKey);
-        if (cached != null && cached.isAlive(properties.getCacheTtl())) {
-            return new AuctionSearchResponse()
-                    .items(cached.items())
-                    .source("avto.jp")
-                    .cached(true);
-        }
-
         List<AuctionLot> items = execute(sql);
-        cache.put(cacheKey, new CacheEntry(items, Instant.now()));
         return new AuctionSearchResponse()
                 .items(items)
-                .source("avto.jp")
+                .source(criteria.source().apiValue())
                 .cached(false);
     }
 
-    public AuctionLot getLot(String id) {
-        List<AuctionLot> lots = execute(sqlBuilder.lotSql(id));
+    public AuctionLot getLot(AuctionSource source, String id) {
+        String cacheKey = source.apiValue() + ':' + id;
+        LotCacheEntry cached = lotCache.get(cacheKey);
+        if (cached != null && cached.isAlive(properties.getLotCacheTtl())) {
+            return cached.lot();
+        }
+
+        List<AuctionLot> lots = execute(sqlBuilder.lotSql(source, id));
         if (lots.isEmpty()) {
             return null;
         }
-        return lots.getFirst();
+        AuctionLot lot = lots.getFirst();
+        lotCache.put(cacheKey, new LotCacheEntry(lot, Instant.now()));
+        return lot;
     }
 
-    public List<String> manufacturers() {
-        return executeRows("select distinct marka_name from main order by marka_name")
+    public List<String> manufacturers(AuctionSource source) {
+        return executeRows(sqlBuilder.manufacturersSql(source))
                 .stream()
                 .map(row -> first(row, "marka_name", "manufacturer", "brand", "make"))
                 .filter(value -> value != null && !value.isBlank())
@@ -80,9 +78,8 @@ public class AuctionClient {
                 .toList();
     }
 
-    public List<String> models(String manufacturer) {
-        return executeRows("select distinct model_name from main where marka_name = '%s' order by model_name"
-                .formatted(escape(manufacturer)))
+    public List<String> models(AuctionSource source, String manufacturer) {
+        return executeRows(sqlBuilder.modelsSql(source, manufacturer))
                 .stream()
                 .map(row -> first(row, "model_name", "model", "name"))
                 .filter(value -> value != null && !value.isBlank())
@@ -97,7 +94,8 @@ public class AuctionClient {
         }
 
         URI uri = URI.create(properties.getApiUrl()
-                + "?json&code=" + encode(properties.getApiCode())
+                + "?json&ip=" + encode(properties.getApiIp())
+                + "&code=" + encode(properties.getApiCode())
                 + "&sql=" + encode(sql));
 
         try {
@@ -118,12 +116,13 @@ public class AuctionClient {
 
         String cacheKey = "rows:" + sql;
         RawCacheEntry cached = rawCache.get(cacheKey);
-        if (cached != null && cached.isAlive(properties.getCacheTtl())) {
+        if (cached != null && cached.isAlive(properties.getDictionaryCacheTtl())) {
             return cached.rows();
         }
 
         URI uri = URI.create(properties.getApiUrl()
-                + "?json&code=" + encode(properties.getApiCode())
+                + "?json&ip=" + encode(properties.getApiIp())
+                + "&code=" + encode(properties.getApiCode())
                 + "&sql=" + encode(sql));
 
         try {
@@ -189,6 +188,7 @@ public class AuctionClient {
                 .color(first(rawFields, "color", "colour"))
                 .engine(first(rawFields, "engine", "eng_v", "volume"))
                 .imageUrl(imageUrl(rawFields))
+                .imageUrls(imageUrls(rawFields))
                 .auctionDate(first(rawFields, "auction_date", "date", "auctionDate"))
                 .rawFields(rawFields);
     }
@@ -205,14 +205,44 @@ public class AuctionClient {
     }
 
     private String imageUrl(Map<String, String> fields) {
-        String image = first(fields, "image", "image_url", "photo", "photo_url", "pictures");
-        if (image == null || image.isBlank()) {
-            return null;
+        List<String> images = imageUrls(fields);
+        return images.isEmpty() ? null : mediumImage(images.getFirst());
+    }
+
+    private List<String> imageUrls(Map<String, String> fields) {
+        String value = first(fields,
+                "images", "pictures", "photos", "image", "image_url", "photo", "photo_url", "img");
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(value.split("[,;|\\s]+"))
+                .map(String::trim)
+                .filter(item -> !item.isBlank())
+                .map(this::normalizeImage)
+                .distinct()
+                .limit(20)
+                .toList();
+    }
+
+    private String normalizeImage(String image) {
+        if (image.startsWith("//")) {
+            return "https:" + image;
         }
         if (image.startsWith("http://") || image.startsWith("https://")) {
-            return image;
+            return image.replaceFirst("^http://", "https://");
         }
-        return "https://7.ajes.com/img/" + image;
+        String token = image.replaceFirst("^/+", "");
+        if (token.startsWith("imgs/")) {
+            token = token.substring(5);
+        }
+        return "https://7.tru.ru/imgs/" + token;
+    }
+
+    private String mediumImage(String image) {
+        if (image.contains("7.tru.ru/imgs/") && !image.contains("&w=")) {
+            return image + "&w=320";
+        }
+        return image;
     }
 
     private String first(Map<String, String> fields, String... names) {
@@ -220,6 +250,13 @@ public class AuctionClient {
             String value = fields.get(name);
             if (value != null && !value.isBlank()) {
                 return value;
+            }
+            for (Map.Entry<String, String> entry : fields.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(name)
+                        && entry.getValue() != null
+                        && !entry.getValue().isBlank()) {
+                    return entry.getValue();
+                }
             }
         }
         return null;
@@ -249,10 +286,6 @@ public class AuctionClient {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private String escape(String value) {
-        return value.replace("\\", "\\\\").replace("'", "''");
-    }
-
     private SimpleClientHttpRequestFactory requestFactory(AuctionProperties properties) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(properties.getTimeout());
@@ -260,7 +293,7 @@ public class AuctionClient {
         return factory;
     }
 
-    private record CacheEntry(List<AuctionLot> items, Instant createdAt) {
+    private record LotCacheEntry(AuctionLot lot, Instant createdAt) {
 
         private boolean isAlive(java.time.Duration ttl) {
             return createdAt.plus(ttl).isAfter(Instant.now());
