@@ -429,6 +429,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const catalogEmpty = document.getElementById('catalogEmpty');
     let catalogCars = [];
     let catalogFilter = { type: 'all', value: 'all' };
+    const popularAuctionSources = [
+        { value: 'japan', country: 'Япония', currency: '¥' },
+        { value: 'korea', country: 'Корея', currency: '₩' },
+        { value: 'china', country: 'Китай', currency: '¥' }
+    ];
 
     function setCatalogMode(mode) {
         catalogModeButtons.forEach(button => {
@@ -503,35 +508,37 @@ window.addEventListener('DOMContentLoaded', () => {
                 return car.country === catalogFilter.value;
             }
             if (catalogFilter.type === 'manufacturer') {
-                return carManufacturer(car.title) === catalogFilter.value;
+                return (car.manufacturer || carManufacturer(car.title)) === catalogFilter.value;
             }
             return true;
         });
 
         catalogGrid.innerHTML = filtered.map(car => {
-            const image = car.imageUrl && !car.imageUrl.includes('car-')
-                ? car.imageUrl
-                : 'images/car-hero.png';
-            const info = [car.year, car.engine].filter(Boolean).join(' · ');
+            const image = car.imageUrl || '';
+            const info = [car.year, car.engine, car.lot ? `лот ${car.lot}` : ''].filter(Boolean).join(' · ');
             return `
                 <article class="catalog-car" data-country="${escapeHtml(car.country || '')}">
                     <div class="catalog-car-img">
-                        <img src="${escapeHtml(image)}" alt="${escapeHtml(car.title || 'Автомобиль')}" onerror="this.src='images/car-hero.png'">
+                        ${image
+                            ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(car.title || 'Автомобиль')}">`
+                            : '<div class="auction-card-placeholder">Фото пока не передано</div>'}
                         <span>${escapeHtml(car.country || 'Авто')}</span>
                     </div>
                     <div class="catalog-car-body">
                         <h3>${escapeHtml(car.title || 'Автомобиль')}</h3>
                         <p>${escapeHtml(info || car.description || 'Подробности уточним при расчёте')}</p>
-                        <strong>${car.price ? `от ${formatPrice(car.price)} ₽` : 'Цена по запросу'}</strong>
+                        <strong>${escapeHtml(car.priceLabel || 'Расчёт по запросу')}</strong>
                         <button
                             class="catalog-more"
+                            data-lot-id="${escapeHtml(car.id || '')}"
+                            data-lot-source="${escapeHtml(car.source || 'japan')}"
                             data-title="${escapeHtml(car.title || 'Автомобиль')}"
                             data-country="${escapeHtml(car.country || '')}"
-                            data-price="${car.price ? `от ${formatPrice(car.price)} ₽` : 'Цена по запросу'}"
+                            data-price="${escapeHtml(car.priceLabel || 'Расчёт по запросу')}"
                             data-image="${escapeHtml(image)}"
                             data-info="${escapeHtml(info)}"
                             data-text="${escapeHtml(car.description || 'Оставьте заявку, и менеджер подготовит расчёт под ключ.')}">
-                            Подробнее
+                            Посмотреть лот
                         </button>
                     </div>
                 </article>
@@ -546,19 +553,38 @@ window.addEventListener('DOMContentLoaded', () => {
     async function loadCatalogData() {
         if (!catalogGrid || !catalogFilterList) return;
 
+        catalogGrid.innerHTML = '<div class="catalog-loading">Загружаем актуальные предложения...</div>';
         try {
-            const [carsResponse, filtersResponse] = await Promise.all([
-                fetch(`${API_BASE}/api/cars`),
-                fetch(`${API_BASE}/api/cars/filters`)
-            ]);
+            const responses = await Promise.allSettled(popularAuctionSources.map(async source => {
+                const response = await fetch(`${API_BASE}/api/auctions/search?source=${source.value}&limit=3`);
+                if (!response.ok) throw new Error('Источник временно недоступен');
+                const payload = await response.json();
+                return (Array.isArray(payload.items) ? payload.items : []).map(lot => ({
+                    id: lot.id,
+                    source: source.value,
+                    country: source.country,
+                    manufacturer: lot.manufacturer || 'Другое',
+                    title: [lot.manufacturer, lot.model].filter(Boolean).join(' ') || `Лот ${lot.id}`,
+                    year: lot.year,
+                    engine: lot.engine ? `${lot.engine} см³` : '',
+                    lot: lot.lot,
+                    imageUrl: lot.imageUrl,
+                    priceLabel: lot.price ? `${formatPrice(lot.price)} ${source.currency}` : 'Расчёт по запросу',
+                    description: [lot.auction, lot.mileage ? `${formatPrice(lot.mileage)} км` : '']
+                        .filter(Boolean).join(' · ')
+                }));
+            }));
 
-            if (!carsResponse.ok || !filtersResponse.ok) {
-                throw new Error('Не удалось загрузить витрину');
-            }
+            catalogCars = responses
+                .filter(result => result.status === 'fulfilled')
+                .flatMap(result => result.value);
+            if (!catalogCars.length) throw new Error('Нет доступных предложений');
 
-            catalogCars = await carsResponse.json();
-            renderCatalogFilters(await filtersResponse.json());
-            renderCatalogCars(Array.isArray(catalogCars) ? catalogCars : []);
+            renderCatalogFilters({
+                countries: [...new Set(catalogCars.map(car => car.country))],
+                manufacturers: [...new Set(catalogCars.map(car => car.manufacturer))].sort()
+            });
+            renderCatalogCars(catalogCars);
         } catch {
             catalogGrid.innerHTML = '';
             if (catalogEmpty) {
@@ -581,6 +607,15 @@ window.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (event) => {
             const button = event.target.closest('.catalog-more');
             if (!button) return;
+
+            if (button.dataset.lotId) {
+                openAuctionLot(
+                    button.dataset.lotId,
+                    button.dataset.lotSource || 'japan',
+                    button.dataset.title || 'Аукционный лот'
+                );
+                return;
+            }
 
             carModalImage.src = button.dataset.image || '';
             carModalCountry.textContent = button.dataset.country || '';

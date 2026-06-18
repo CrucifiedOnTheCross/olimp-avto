@@ -125,7 +125,8 @@ src/main/resources/application.yml
 | `MAIL_SMTP_STARTTLS` | включить STARTTLS | `false` |
 | `MAIL_SMTP_SSL` | включить SSL для SMTP, обычно порт `465` | `false` |
 | `APP_MAIL_FROM` | адрес отправителя | `noreply@olimp-avto.local` |
-| `APP_MAIL_TO` | адрес получателя заявок | `olimpautovl125@gmail.com` |
+| `APP_MAIL_TO` | адрес модерации отзывов | `olimpautovl125@gmail.com` |
+| `APP_MAIL_LEAD_TO` | адреса получателей заявок через запятую | `olimpautovl125@gmail.com,olimpauvtovl125@outlook.com` |
 | `APP_ADMIN_USERNAME` | логин администратора | `admin` |
 | `APP_ADMIN_PASSWORD` | пароль администратора | `admin123` |
 | `APP_PUBLIC_BASE_URL` | публичный адрес backend для ссылок модерации в письмах | `http://localhost:8080` |

@@ -47,3 +47,4 @@ app:
   mail:
     from: ${APP_MAIL_FROM:noreply@olimp-avto.local}
     to: ${APP_MAIL_TO:olimpautovl125@gmail.com}
+    lead-to: ${APP_MAIL_LEAD_TO:olimpautovl125@gmail.com,olimpauvtovl125@outlook.com}

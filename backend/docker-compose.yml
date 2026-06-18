@@ -27,6 +27,7 @@ services:
       MAIL_PORT: 1025
       APP_MAIL_FROM: noreply@olimp-avto.local
       APP_MAIL_TO: olimpautovl125@gmail.com
+      APP_MAIL_LEAD_TO: olimpautovl125@gmail.com,olimpauvtovl125@outlook.com
       APP_ADMIN_USERNAME: admin
       APP_ADMIN_PASSWORD: admin123
       APP_PUBLIC_BASE_URL: https://olimpavtovl.ru

@@ -3509,6 +3509,28 @@ body {
     background-repeat: no-repeat;
 }
 
+.auction-search select option {
+    background: #fff;
+    color: #171112;
+    font-weight: 600;
+}
+
+.auction-search select option:checked {
+    background: #d88916;
+    color: #fff;
+}
+
+.catalog-loading {
+    grid-column: 1 / -1;
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(224, 162, 54, 0.24);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(20, 8, 9, 0.72);
+}
+
 .auction-search-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

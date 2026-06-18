@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
-    <link rel="stylesheet" href="style.css?v=20260618">
+    <link rel="stylesheet" href="style.css?v=20260618-2">
 </head>
 <body>
 
@@ -61,8 +61,8 @@
             <span>Каталог автомобилей</span>
             <h1>Подберите авто <span>из витрины или аукциона</span></h1>
             <p>
-                Готовые примеры автомобилей для быстрого расчета и поиск актуальных лотов
-                с японских аукционов.
+                Небольшая подборка актуальных лотов и точный поиск автомобилей
+                на аукционах Японии, Кореи и Китая.
             </p>
         </div>
     </section>
@@ -71,17 +71,17 @@
         <div class="container">
             <div class="catalog-mode-tabs" role="tablist" aria-label="Режим каталога">
                 <button class="catalog-mode-tab active" type="button" data-catalog-mode="popular">
-                    Популярные авто
+                    Актуальные предложения
                 </button>
                 <button class="catalog-mode-tab" type="button" data-catalog-mode="auction">
-                    Аукционы Японии
+                    Аукционы
                 </button>
             </div>
 
             <section class="catalog-mode-panel active" id="popularCatalogPanel" data-catalog-panel="popular">
                 <div class="catalog-layout">
                     <aside class="catalog-sidebar">
-                        <h3>Готовые варианты</h3>
+                        <h3>Авто в продаже</h3>
                         <div class="catalog-filter-list" id="catalogFilterList">
                             <button class="catalog-category active" data-filter-type="all" data-filter-value="all">Все</button>
                         </div>
@@ -89,8 +89,8 @@
                         <div class="catalog-filter-group">
                             <h4>Что дальше</h4>
                             <p class="catalog-help">
-                                Выберите подходящий вариант или перейдите в аукционы,
-                                чтобы посмотреть актуальные лоты.
+                                Здесь показана небольшая подборка актуальных лотов.
+                                Для точного поиска используйте вкладку аукционов.
                             </p>
                         </div>
                     </aside>
@@ -98,18 +98,18 @@
                     <div class="catalog-content">
                         <div class="catalog-top">
                             <div>
-                                <span class="catalog-kicker">Быстрый старт</span>
-                                <h2>Популярные варианты</h2>
+                                <span class="catalog-kicker">Обновляется из базы аукционов</span>
+                                <h2>Актуальные предложения</h2>
                             </div>
                             <button class="catalog-switch-link" type="button" data-catalog-mode="auction">
-                                Искать на аукционе
+                                Перейти к поиску
                             </button>
                         </div>
 
                         <div class="catalog-grid" id="catalogGrid"></div>
 
                         <div class="catalog-empty" id="catalogEmpty" hidden>
-                            В этой категории пока нет готовых примеров. Перейдите в аукционы или оставьте заявку на подбор.
+                            В этой категории сейчас нет активных лотов. Перейдите в поиск аукционов или оставьте заявку на подбор.
                         </div>
                     </div>
                 </div>
@@ -310,8 +310,8 @@
 
             <div class="footer-col">
                 <h4>Авто</h4>
-                <a href="catalog.html?mode=auction">Аукционы Японии</a>
-                <a href="catalog.html">Популярные авто</a>
+                <a href="catalog.html?mode=auction">Аукционы</a>
+                <a href="catalog.html">Актуальные предложения</a>
                 <a href="contacts.html">Доставка</a>
                 <a href="about.html">О компании</a>
             </div>
@@ -348,7 +348,7 @@
 </footer>
 
 <script src="config.js"></script>
-<script src="scripts.js?v=20260618"></script>
+<script src="scripts.js?v=20260618-2"></script>
 
 </body>
 </html>

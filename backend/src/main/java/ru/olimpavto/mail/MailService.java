@@ -38,7 +38,7 @@ public class MailService {
                 Boolean.TRUE.equals(request.getPolicyAccepted()) ? "да" : "нет"
         );
 
-        sendMessage("Новая заявка с сайта", body, List.of());
+        sendMessage("Новая заявка с сайта", body, List.of(), leadRecipients());
     }
 
     public void sendReview(
@@ -61,7 +61,7 @@ public class MailService {
                 %s
                 """.formatted(rating, name, carModel, country, text);
 
-        sendMessage("Новый отзыв с сайта", body, photos == null ? List.of() : photos);
+        sendMessage("Новый отзыв с сайта", body, photos == null ? List.of() : photos, reviewRecipients());
     }
 
     public void sendReviewModeration(
@@ -96,15 +96,20 @@ public class MailService {
                 rejectUrl
         );
 
-        sendMessage("Новый отзыв ожидает модерации", body, photos == null ? List.of() : photos);
+        sendMessage("Новый отзыв ожидает модерации", body, photos == null ? List.of() : photos, reviewRecipients());
     }
 
-    private void sendMessage(String subject, String body, List<MultipartFile> attachments) {
+    private void sendMessage(
+            String subject,
+            String body,
+            List<MultipartFile> attachments,
+            List<String> recipients
+    ) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(properties.getFrom());
-            helper.setTo(properties.getTo());
+            helper.setTo(recipients.toArray(String[]::new));
             helper.setSubject(subject);
             helper.setText(body, false);
 
@@ -118,6 +123,19 @@ public class MailService {
         } catch (MessagingException exception) {
             throw new IllegalStateException("Не удалось подготовить письмо", exception);
         }
+    }
+
+    private List<String> leadRecipients() {
+        List<String> recipients = properties.getLeadTo().stream()
+                .filter(address -> address != null && !address.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+        return recipients.isEmpty() ? reviewRecipients() : recipients;
+    }
+
+    private List<String> reviewRecipients() {
+        return List.of(properties.getTo());
     }
 
     private String valueOrDash(String value) {
