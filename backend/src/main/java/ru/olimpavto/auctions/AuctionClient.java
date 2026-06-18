@@ -181,7 +181,7 @@ public class AuctionClient {
                 .model(first(rawFields, "model_name", "model", "name"))
                 .year(integer(first(rawFields, "year", "YEAR")))
                 .mileage(integer(first(rawFields, "mileage", "probeg", "miles")))
-                .price(longValue(first(rawFields, "price", "start_price", "finish_price")))
+                .price(auctionPrice(rawFields))
                 .auction(first(rawFields, "auction", "auction_name", "auctionName"))
                 .lot(first(rawFields, "lot", "lot_no", "lotNo"))
                 .grade(first(rawFields, "grade", "rate", "rating", "ocenka"))
@@ -189,7 +189,7 @@ public class AuctionClient {
                 .engine(first(rawFields, "engine", "eng_v", "volume"))
                 .imageUrl(imageUrl(rawFields))
                 .imageUrls(imageUrls(rawFields))
-                .auctionDate(first(rawFields, "auction_date", "date", "auctionDate"))
+                .auctionDate(auctionDate(rawFields))
                 .rawFields(rawFields);
     }
 
@@ -215,7 +215,7 @@ public class AuctionClient {
         if (value == null || value.isBlank()) {
             return List.of();
         }
-        return java.util.Arrays.stream(value.split("[,;|\\s]+"))
+        return java.util.Arrays.stream(value.split("[#,;|\\s]+"))
                 .map(String::trim)
                 .filter(item -> !item.isBlank())
                 .map(this::normalizeImage)
@@ -225,6 +225,7 @@ public class AuctionClient {
     }
 
     private String normalizeImage(String image) {
+        image = image.replaceAll("&(?:h|w)=\\d+$", "");
         if (image.startsWith("//")) {
             return "https:" + image;
         }
@@ -236,6 +237,21 @@ public class AuctionClient {
             token = token.substring(5);
         }
         return "https://7.tru.ru/imgs/" + token;
+    }
+
+    private Long auctionPrice(Map<String, String> fields) {
+        for (String field : List.of("finish", "finish_price", "price", "start", "start_price", "avg_price")) {
+            Long value = longValue(first(fields, field));
+            if (value != null && value > 0) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private String auctionDate(Map<String, String> fields) {
+        String value = first(fields, "auction_date", "date", "auctionDate");
+        return value == null || value.startsWith("0000-00-00") ? null : value;
     }
 
     private String mediumImage(String image) {
