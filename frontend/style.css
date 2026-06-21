@@ -3786,14 +3786,50 @@ body {
     position: sticky;
     top: 104px;
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
     padding: 20px;
     border: 1px solid rgba(244, 177, 61, 0.26);
-    border-radius: 26px;
+    max-height: calc(100vh - 124px);
+    overflow-y: auto;
+    border-radius: 8px;
     background:
         radial-gradient(circle at top left, rgba(224,162,54,0.11), transparent 34%),
         linear-gradient(180deg, rgba(60,8,10,0.88), rgba(8,4,5,0.98));
     box-shadow: 0 28px 70px rgba(0,0,0,0.55);
+}
+
+.auction-search .catalog-filter-head {
+    grid-column: 1 / -1;
+    margin-bottom: 2px;
+}
+
+.auction-search .catalog-filter-head button {
+    width: auto;
+    min-height: 0;
+    padding: 5px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: rgba(255,255,255,0.58);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.auction-search .catalog-filter-head button:hover {
+    transform: none;
+    color: #f4b13d;
+}
+
+.auction-search .catalog-field,
+.auction-search .catalog-range label {
+    color: inherit;
+    font-size: inherit;
+}
+
+.auction-search .catalog-field-wide {
+    grid-column: 1 / -1;
 }
 
 .auction-search h2,
@@ -3838,6 +3874,19 @@ body {
 .auction-lead-box textarea:focus {
     outline: none;
     border-color: rgba(244, 177, 61, 0.78);
+}
+
+.auction-search .catalog-field input,
+.auction-search .catalog-field select,
+.auction-search .catalog-range input {
+    min-height: 44px;
+    border-radius: 8px;
+    background-color: rgba(5,3,4,0.72);
+}
+
+.auction-search .catalog-filter-submit {
+    min-height: 48px;
+    border-radius: 8px;
 }
 
 .auction-search select {

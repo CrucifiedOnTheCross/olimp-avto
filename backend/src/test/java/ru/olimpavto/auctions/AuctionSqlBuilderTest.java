@@ -44,8 +44,9 @@ class AuctionSqlBuilderTest {
         assertThat(sql).contains("eng_v <= 2500");
         assertThat(sql).contains("kpp like '%AT%'");
         assertThat(sql).contains("priv like '%4WD%'");
-        assertThat(sql).contains("case when finish > 0 then finish when start > 0 then start else avg_price end >= 100000");
-        assertThat(sql).contains("order by case when finish > 0 then finish when start > 0 then start else avg_price end asc,id desc");
+        assertThat(sql).contains("start >= 100000");
+        assertThat(sql).contains("start <= 2000000");
+        assertThat(sql).contains("order by year desc,auction_date desc,id desc");
         assertThat(sql).endsWith("limit 24,50");
     }
 
@@ -60,6 +61,19 @@ class AuctionSqlBuilderTest {
 
         assertThat(sql).contains("order by year desc,auction_date desc,id desc");
         assertThat(sql).doesNotContain("drop table");
+    }
+
+    @Test
+    void priceFilterUsesFinishPriceOutsideJapan() {
+        String sql = builder.searchSql(new AuctionSearchCriteria(
+                AuctionSource.KOREA,
+                null, null, null,
+                null, null, null, null, null, null, 1_000_000L, 9_000_000L,
+                null, null, "priceDesc", null, null, 20, 0
+        ));
+
+        assertThat(sql).contains("finish >= 1000000", "finish <= 9000000");
+        assertThat(sql).doesNotContain("case when");
     }
 
     @Test

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
-    <link rel="stylesheet" href="style.css?v=20260622-1">
+    <link rel="stylesheet" href="style.css?v=20260622-2">
 </head>
 <body>
 
@@ -197,68 +197,68 @@
             <section class="catalog-mode-panel" id="auctionCatalogPanel" data-catalog-panel="auction">
                 <div class="auction-layout catalog-auction-layout">
                     <form class="auction-search" id="auctionSearchForm">
-                        <h2>Поиск лотов</h2>
-                        <label>
-                            Страна аукциона
+                        <div class="catalog-filter-head">
+                            <div>
+                                <span>Поиск по базе</span>
+                                <h2>Фильтры</h2>
+                            </div>
+                            <button type="reset" id="auctionFilterReset">Сбросить</button>
+                        </div>
+                        <label class="catalog-field catalog-field-wide">
+                            <span>Страна</span>
                             <select name="source" id="auctionSource">
                                 <option value="japan">Япония</option>
                                 <option value="korea">Корея</option>
                                 <option value="china">Китай</option>
                             </select>
                         </label>
-                        <label>
-                            Быстрый поиск
+                        <label class="catalog-field catalog-field-wide">
+                            <span>Марка или модель</span>
                             <input type="search" name="query" placeholder="Например, Toyota Prius">
                         </label>
-                        <label>
-                            Марка
+                        <label class="catalog-field catalog-field-wide">
+                            <span>Марка</span>
                             <select name="manufacturer" id="auctionManufacturer">
                                 <option value="">Любая марка</option>
                             </select>
                         </label>
-                        <label>
-                            Модель
+                        <label class="catalog-field catalog-field-wide">
+                            <span>Модель</span>
                             <select name="model" id="auctionModel" disabled>
                                 <option value="">Сначала выберите марку</option>
                             </select>
                         </label>
-                        <div class="auction-search-row">
-                            <label>
-                                Год от
-                                <input type="number" name="yearFrom" min="1980" max="2100" placeholder="2018">
-                            </label>
-                            <label>
-                                Год до
-                                <input type="number" name="yearTo" min="1980" max="2100" placeholder="2026">
-                            </label>
-                        </div>
-                        <label>
-                            Пробег до, км
-                            <input type="number" name="maxMileage" min="1" placeholder="80000">
-                        </label>
-                        <div class="auction-search-row">
-                            <label>
-                                Номер лота
-                                <input type="text" name="lotNumber" maxlength="40" placeholder="Например, 1256">
-                            </label>
-                            <label>
-                                День торгов
-                                <select name="dayOfWeek">
-                                    <option value="">Любой день</option>
-                                    <option value="1">Понедельник</option>
-                                    <option value="2">Вторник</option>
-                                    <option value="3">Среда</option>
-                                    <option value="4">Четверг</option>
-                                    <option value="5">Пятница</option>
-                                    <option value="6">Суббота</option>
-                                    <option value="7">Воскресенье</option>
-                                </select>
-                            </label>
-                        </div>
-                        <button type="submit">Найти лоты</button>
-                        <p class="auction-note">
-                            Найдите подходящий лот, а менеджер поможет проверить автомобиль и рассчитать доставку.
-                        </p>
+                        <fieldset class="catalog-range catalog-field-wide">
+                            <legend>Год выпуска</legend>
+                            <label><span>От</span><input type="number" name="yearFrom" min="1980" max="2100" placeholder="2005"></label>
+                            <label><span>До</span><input type="number" name="yearTo" min="1980" max="2100" placeholder="2026"></label>
+                        </fieldset>
+                        <fieldset class="catalog-range catalog-field-wide">
+                            <legend>Пробег, км</legend>
+                            <label><span>От</span><input type="number" name="minMileage" min="0" placeholder="0"></label>
+                            <label><span>До</span><input type="number" name="maxMileage" min="1" placeholder="100 000"></label>
+                        </fieldset>
+                        <details class="catalog-advanced catalog-field-wide">
+                            <summary>Дополнительные параметры <span>+</span></summary>
+                            <div class="catalog-advanced-grid">
+                                <fieldset class="catalog-range catalog-field-wide">
+                                    <legend>Объём двигателя, см³</legend>
+                                    <label><span>От</span><input type="number" name="engineFrom" min="0" placeholder="500"></label>
+                                    <label><span>До</span><input type="number" name="engineTo" min="1" placeholder="3000"></label>
+                                </fieldset>
+                                <fieldset class="catalog-range catalog-field-wide">
+                                    <legend>Цена в валюте страны</legend>
+                                    <label><span>От</span><input type="number" name="priceFrom" min="0" placeholder="100 000"></label>
+                                    <label><span>До</span><input type="number" name="priceTo" min="1" placeholder="Без ограничения"></label>
+                                </fieldset>
+                                <label class="catalog-field"><span>Коробка</span><select name="transmission"><option value="">Любая</option><option value="AT">Автомат</option><option value="MT">Механика</option></select></label>
+                                <label class="catalog-field"><span>Привод</span><select name="drive"><option value="">Любой</option><option value="2wd">2WD</option><option value="4wd">4WD</option></select></label>
+                                <label class="catalog-field catalog-field-wide"><span>Сортировка</span><select name="sort" id="auctionSort"><option value="newest">Сначала новые</option><option value="priceAsc">Сначала дешевле</option><option value="priceDesc">Сначала дороже</option><option value="mileageAsc">Меньше пробег</option><option value="yearDesc">Год: новее</option><option value="yearAsc">Год: старше</option></select></label>
+                                <label class="catalog-field"><span>Номер лота</span><input type="text" name="lotNumber" maxlength="40" placeholder="Например, 1256"></label>
+                                <label class="catalog-field"><span>День торгов</span><select name="dayOfWeek"><option value="">Любой день</option><option value="1">Понедельник</option><option value="2">Вторник</option><option value="3">Среда</option><option value="4">Четверг</option><option value="5">Пятница</option><option value="6">Суббота</option><option value="7">Воскресенье</option></select></label>
+                            </div>
+                        </details>
+                        <button class="catalog-filter-submit catalog-field-wide" type="submit">Показать автомобили</button>
                     </form>
 
                     <div class="auction-results">
@@ -275,6 +275,7 @@
                         </div>
 
                         <div class="auction-grid" id="auctionGrid"></div>
+                        <button class="catalog-load-more" id="auctionLoadMore" type="button" hidden>Показать ещё</button>
                     </div>
                 </div>
             </section>
@@ -447,7 +448,7 @@
 </footer>
 
 <script src="config.js"></script>
-<script src="scripts.js?v=20260622-1"></script>
+<script src="scripts.js?v=20260622-2"></script>
 
 </body>
 </html>

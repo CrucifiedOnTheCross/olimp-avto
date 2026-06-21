@@ -64,6 +64,21 @@ class AuctionsControllerTest {
                 .hasMessage("Проверьте параметры поиска");
     }
 
+    @Test
+    void modelDictionaryUsesGeneratedOpenApiParameterOrder() {
+        RecordingAuctionClient client = new RecordingAuctionClient();
+        AuctionsController searchController = new AuctionsController(
+                client,
+                leadsController,
+                new AuctionAccessGuard(new AuctionProperties())
+        );
+
+        searchController.listAuctionModels("TOYOTA", "japan");
+
+        assertThat(client.source).isEqualTo(AuctionSource.JAPAN);
+        assertThat(client.manufacturer).isEqualTo("TOYOTA");
+    }
+
     private static class RecordingLeadsController extends LeadsController {
 
         private String name;
@@ -92,6 +107,19 @@ class AuctionsControllerTest {
         @Override
         public AuctionSearchResponse search(AuctionSearchCriteria criteria) {
             return new AuctionSearchResponse().items(java.util.List.of());
+        }
+    }
+
+    private static class RecordingAuctionClient extends FakeAuctionClient {
+
+        private AuctionSource source;
+        private String manufacturer;
+
+        @Override
+        public java.util.List<String> models(AuctionSource source, String manufacturer) {
+            this.source = source;
+            this.manufacturer = manufacturer;
+            return java.util.List.of("PRIUS");
         }
     }
 }

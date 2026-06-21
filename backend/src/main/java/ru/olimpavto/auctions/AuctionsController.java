@@ -42,8 +42,8 @@ public class AuctionsController implements AuctionsApiDelegate {
             String model,
             Integer yearFrom,
             Integer yearTo,
-            Integer minMileage,
             Integer maxMileage,
+            Integer minMileage,
             Integer engineFrom,
             Integer engineTo,
             Long priceFrom,
@@ -100,7 +100,7 @@ public class AuctionsController implements AuctionsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<java.util.List<String>> listAuctionModels(String source, String manufacturer) {
+    public ResponseEntity<java.util.List<String>> listAuctionModels(String manufacturer, String source) {
         accessGuard.checkRequest();
         if (manufacturer == null || manufacturer.isBlank()) {
             throw new BadRequestException("Не выбрана марка", Map.of("manufacturer", "Выберите марку"));

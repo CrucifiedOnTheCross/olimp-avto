@@ -846,7 +846,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if (catalogSort) {
         catalogSort.addEventListener('change', () => {
             catalogCriteria = readCatalogCriteria();
-            loadMoreCatalogCars(true);
+            sortCatalogCars(catalogCars);
+            renderCatalogCars(catalogCars);
         });
     }
 
@@ -926,6 +927,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const auctionSearchForm = document.getElementById('auctionSearchForm');
     const auctionRefresh = document.getElementById('auctionRefresh');
     const auctionGrid = document.getElementById('auctionGrid');
+    const auctionLoadMore = document.getElementById('auctionLoadMore');
+    const auctionSort = document.getElementById('auctionSort');
     const auctionState = document.getElementById('auctionState');
     const auctionLeadModal = document.getElementById('auctionLeadModal');
     const auctionLeadForm = document.getElementById('auctionLeadForm');
@@ -945,6 +948,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const auctionCaptchaAnswer = document.getElementById('auctionCaptchaAnswer');
     const auctionCaptchaId = document.getElementById('auctionCaptchaId');
     const auctionCaptchaVerify = document.getElementById('auctionCaptchaVerify');
+    let auctionItems = [];
+    let auctionOffset = 0;
+    let auctionHasMore = false;
+    let auctionLoading = false;
+    let auctionResultSource = 'japan';
     let pendingLotRequest = null;
 
     const auctionSources = {
@@ -1030,6 +1038,7 @@ window.addEventListener('DOMContentLoaded', () => {
             auctionState.hidden = true;
         }
 
+        const currency = auctionSources[source]?.currency || '';
         auctionGrid.innerHTML = items.map(lot => `
             <article class="auction-card">
                 <div class="auction-card-media">
@@ -1042,7 +1051,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     <h3>${escapeHtml(auctionTitle(lot))}</h3>
                     <p>${escapeHtml(auctionMeta(lot) || 'Данные лота уточняются')}</p>
                     <dl>
-                        <div><dt>Цена</dt><dd>${lot.price ? `${formatPrice(lot.price)} ¥` : 'по запросу'}</dd></div>
+                        <div><dt>Цена</dt><dd>${lot.price ? `${formatPrice(lot.price)} ${currency}` : 'по запросу'}</dd></div>
                         <div><dt>Цвет</dt><dd>${escapeHtml(lot.color || '-')}</dd></div>
                         <div><dt>Двигатель</dt><dd>${escapeHtml(lot.engine || '-')}</dd></div>
                     </dl>
@@ -1064,6 +1073,21 @@ window.addEventListener('DOMContentLoaded', () => {
                 button.dataset.lotTitle || 'Аукционный лот'
             ));
         });
+    }
+
+    function sortAuctionItems(items, sort) {
+        const direction = String(sort).endsWith('Asc') ? 1 : -1;
+        const value = lot => {
+            const missing = direction === 1 ? Number.MAX_SAFE_INTEGER : 0;
+            if (String(sort).startsWith('price')) return Number(lot.price) || missing;
+            if (String(sort).startsWith('mileage')) return Number(lot.mileage) || missing;
+            return Number(lot.year) || 0;
+        };
+        items.sort((a, b) => {
+            const difference = value(a) - value(b);
+            return difference ? difference * direction : String(b.id).localeCompare(String(a.id));
+        });
+        return items;
     }
 
     function renderAuctionLotDetails(lot, source) {
@@ -1147,26 +1171,41 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function searchAuctions() {
-        if (!auctionSearchForm || !auctionGrid) return;
+    async function searchAuctions(loadMore = false) {
+        if (!auctionSearchForm || !auctionGrid || auctionLoading || (loadMore && !auctionHasMore)) return;
+
+        if (!loadMore) {
+            auctionItems = [];
+            auctionOffset = 0;
+            auctionHasMore = true;
+        }
 
         const formData = new FormData(auctionSearchForm);
         const params = new URLSearchParams();
-        ['source', 'query', 'manufacturer', 'model', 'yearFrom', 'yearTo', 'maxMileage', 'lotNumber', 'dayOfWeek'].forEach(name => {
+        ['source', 'query', 'manufacturer', 'model', 'yearFrom', 'yearTo', 'minMileage', 'maxMileage',
+            'engineFrom', 'engineTo', 'priceFrom', 'priceTo', 'transmission', 'drive', 'sort',
+            'lotNumber', 'dayOfWeek'].forEach(name => {
             const value = String(formData.get(name) || '').trim();
             if (value) {
                 params.set(name, value);
             }
         });
         params.set('limit', '20');
+        params.set('offset', String(auctionOffset));
 
         const button = auctionSearchForm.querySelector('button[type="submit"]');
         const previousText = button ? button.textContent : '';
+        auctionLoading = true;
         if (button) {
             button.disabled = true;
             button.textContent = 'Ищем...';
         }
-        setAuctionState('Загружаем лоты...');
+        if (auctionLoadMore) {
+            auctionLoadMore.hidden = false;
+            auctionLoadMore.disabled = true;
+            auctionLoadMore.textContent = 'Загружаем ещё автомобили...';
+        }
+        if (!loadMore) setAuctionState('Загружаем лоты...');
 
         try {
             const response = await fetch(`${API_BASE}/api/auctions/search?${params.toString()}`);
@@ -1183,14 +1222,27 @@ window.addEventListener('DOMContentLoaded', () => {
                     : message);
             }
             const result = await response.json();
-            renderAuctionLots(Array.isArray(result.items) ? result.items : [], result.source || currentAuctionSource());
+            const items = Array.isArray(result.items) ? result.items : [];
+            auctionResultSource = result.source || currentAuctionSource();
+            auctionOffset += items.length;
+            auctionHasMore = items.length === 20;
+            const known = new Set(auctionItems.map(lot => lot.id));
+            auctionItems.push(...items.filter(lot => !known.has(lot.id)));
+            sortAuctionItems(auctionItems, formData.get('sort') || 'newest');
+            renderAuctionLots(auctionItems, auctionResultSource);
         } catch (error) {
-            auctionGrid.innerHTML = '';
+            if (!loadMore) auctionGrid.innerHTML = '';
             setAuctionState(error.message || 'Не удалось загрузить аукционные лоты', 'error');
         } finally {
+            auctionLoading = false;
             if (button) {
                 button.disabled = false;
                 button.textContent = previousText;
+            }
+            if (auctionLoadMore) {
+                auctionLoadMore.hidden = !auctionHasMore || !auctionItems.length;
+                auctionLoadMore.disabled = false;
+                auctionLoadMore.textContent = 'Показать ещё';
             }
         }
     }
@@ -1199,8 +1251,15 @@ window.addEventListener('DOMContentLoaded', () => {
         auctionSearchForm.addEventListener('submit', (event) => {
             event.preventDefault();
             if (auctionSearchForm.reportValidity()) {
-                searchAuctions();
+                searchAuctions(false);
             }
+        });
+        auctionSearchForm.addEventListener('reset', () => {
+            setTimeout(() => {
+                setSelectOptions(auctionModel, [], 'Сначала выберите марку');
+                if (auctionModel) auctionModel.disabled = true;
+                loadAuctionManufacturers();
+            }, 0);
         });
     }
 
@@ -1223,6 +1282,23 @@ window.addEventListener('DOMContentLoaded', () => {
             setAuctionState('Настройте параметры и запустите поиск.');
             if (auctionGrid) auctionGrid.innerHTML = '';
         });
+    }
+
+    if (auctionSort) {
+        auctionSort.addEventListener('change', () => {
+            sortAuctionItems(auctionItems, auctionSort.value);
+            renderAuctionLots(auctionItems, auctionResultSource);
+        });
+    }
+
+    if (auctionLoadMore) {
+        auctionLoadMore.addEventListener('click', () => searchAuctions(true));
+        if ('IntersectionObserver' in window) {
+            const auctionObserver = new IntersectionObserver(entries => {
+                if (entries.some(entry => entry.isIntersecting)) searchAuctions(true);
+            }, { rootMargin: '500px 0px' });
+            auctionObserver.observe(auctionLoadMore);
+        }
     }
 
     if (auctionCaptchaVerify) {
@@ -1251,7 +1327,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     if (auctionRefresh) {
-        auctionRefresh.addEventListener('click', searchAuctions);
+        auctionRefresh.addEventListener('click', () => searchAuctions(false));
     }
 
     if (auctionLeadClose && auctionLeadModal) {

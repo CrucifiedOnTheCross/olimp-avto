@@ -9,8 +9,6 @@ public class AuctionSqlBuilder {
 
     private static final int DEFAULT_LIMIT = 20;
     private static final int MAX_LIMIT = 50;
-    private static final String PRICE_EXPRESSION =
-            "case when finish > 0 then finish when start > 0 then start else avg_price end";
 
     public String searchSql(AuctionSearchCriteria criteria) {
         List<String> where = new ArrayList<>();
@@ -40,10 +38,10 @@ public class AuctionSqlBuilder {
             where.add("eng_v <= " + criteria.engineTo());
         }
         if (criteria.priceFrom() != null) {
-            where.add(PRICE_EXPRESSION + " >= " + criteria.priceFrom());
+            where.add(priceField(criteria.source()) + " >= " + criteria.priceFrom());
         }
         if (criteria.priceTo() != null) {
-            where.add(PRICE_EXPRESSION + " <= " + criteria.priceTo());
+            where.add(priceField(criteria.source()) + " <= " + criteria.priceTo());
         }
         if (criteria.transmission() != null && !criteria.transmission().isBlank()) {
             where.add("kpp like '%" + escape(criteria.transmission().trim()) + "%'");
@@ -62,7 +60,7 @@ public class AuctionSqlBuilder {
                 .formatted(
                         criteria.source().table(),
                         String.join(" and ", where),
-                        orderBy(criteria.sort()),
+                        "year desc,auction_date desc,id desc",
                         offset(criteria.offset()),
                         limit(criteria.limit())
                 );
@@ -107,16 +105,8 @@ public class AuctionSqlBuilder {
         return requestedOffset == null ? 0 : Math.max(0, Math.min(requestedOffset, 1000));
     }
 
-    private String orderBy(String sort) {
-        return switch (sort == null ? "newest" : sort) {
-            case "yearDesc" -> "year desc,id desc";
-            case "yearAsc" -> "year asc,id asc";
-            case "priceAsc" -> PRICE_EXPRESSION + " asc,id desc";
-            case "priceDesc" -> PRICE_EXPRESSION + " desc,id desc";
-            case "mileageAsc" -> "mileage asc,id desc";
-            case "mileageDesc" -> "mileage desc,id desc";
-            default -> "year desc,auction_date desc,id desc";
-        };
+    private String priceField(AuctionSource source) {
+        return source == AuctionSource.JAPAN ? "start" : "finish";
     }
 
     private String escape(String value) {
