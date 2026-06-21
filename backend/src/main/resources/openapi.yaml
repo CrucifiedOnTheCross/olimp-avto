@@ -65,6 +65,57 @@ paths:
           schema:
             type: integer
             minimum: 1
+        - name: minMileage
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: engineFrom
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: engineTo
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: priceFrom
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: priceTo
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: transmission
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [AT, MT]
+        - name: drive
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [2wd, 4wd]
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [newest, yearDesc, yearAsc, priceAsc, priceDesc, mileageAsc, mileageDesc]
+            default: newest
         - name: lotNumber
           in: query
           required: false

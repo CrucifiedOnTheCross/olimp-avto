@@ -42,14 +42,23 @@ public class AuctionsController implements AuctionsApiDelegate {
             String model,
             Integer yearFrom,
             Integer yearTo,
+            Integer minMileage,
             Integer maxMileage,
+            Integer engineFrom,
+            Integer engineTo,
+            Long priceFrom,
+            Long priceTo,
+            String transmission,
+            String drive,
+            String sort,
             String lotNumber,
             Integer dayOfWeek,
             Integer limit,
             Integer offset
     ) {
         accessGuard.checkRequest();
-        validateSearch(yearFrom, yearTo, dayOfWeek, limit, offset);
+        validateSearch(yearFrom, yearTo, minMileage, maxMileage, engineFrom, engineTo,
+                priceFrom, priceTo, dayOfWeek, limit, offset);
         return ResponseEntity.ok(auctionClient.search(new AuctionSearchCriteria(
                 source(source),
                 query,
@@ -57,7 +66,15 @@ public class AuctionsController implements AuctionsApiDelegate {
                 model,
                 yearFrom,
                 yearTo,
+                minMileage,
                 maxMileage,
+                engineFrom,
+                engineTo,
+                priceFrom,
+                priceTo,
+                transmission,
+                drive,
+                sort,
                 lotNumber,
                 dayOfWeek,
                 limit,
@@ -120,6 +137,12 @@ public class AuctionsController implements AuctionsApiDelegate {
     private void validateSearch(
             Integer yearFrom,
             Integer yearTo,
+            Integer minMileage,
+            Integer maxMileage,
+            Integer engineFrom,
+            Integer engineTo,
+            Long priceFrom,
+            Long priceTo,
             Integer dayOfWeek,
             Integer limit,
             Integer offset
@@ -127,6 +150,15 @@ public class AuctionsController implements AuctionsApiDelegate {
         Map<String, String> fields = new LinkedHashMap<>();
         if (yearFrom != null && yearTo != null && yearFrom > yearTo) {
             fields.put("yearFrom", "Год от не может быть больше года до");
+        }
+        if (minMileage != null && maxMileage != null && minMileage > maxMileage) {
+            fields.put("minMileage", "Минимальный пробег не может быть больше максимального");
+        }
+        if (engineFrom != null && engineTo != null && engineFrom > engineTo) {
+            fields.put("engineFrom", "Минимальный объём не может быть больше максимального");
+        }
+        if (priceFrom != null && priceTo != null && priceFrom > priceTo) {
+            fields.put("priceFrom", "Минимальная цена не может быть больше максимальной");
         }
         if (limit != null && (limit < 1 || limit > 50)) {
             fields.put("limit", "Можно запросить от 1 до 50 лотов");

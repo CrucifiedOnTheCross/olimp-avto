@@ -56,7 +56,9 @@ class AuctionsControllerTest {
         );
 
         assertThatThrownBy(() -> searchController.searchAuctions(
-                "japan", null, null, null, 2025, 2020, null, null, null, 20, 0
+                "japan", null, null, null, 2025, 2020,
+                null, null, null, null, null, null,
+                null, null, null, null, null, 20, 0
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Проверьте параметры поиска");

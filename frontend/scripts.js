@@ -424,7 +424,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const catalogModeButtons = document.querySelectorAll('[data-catalog-mode]');
     const catalogModePanels = document.querySelectorAll('[data-catalog-panel]');
-    const catalogFilterList = document.getElementById('catalogFilterList');
+    const catalogFilterForm = document.getElementById('catalogFilterForm');
+    const catalogFilterReset = document.getElementById('catalogFilterReset');
+    const catalogSource = document.getElementById('catalogSource');
+    const catalogManufacturer = document.getElementById('catalogManufacturer');
+    const catalogModel = document.getElementById('catalogModel');
+    const catalogSort = document.getElementById('catalogSort');
+    const catalogResultCount = document.getElementById('catalogResultCount');
+    const catalogActiveFilters = document.getElementById('catalogActiveFilters');
     const catalogGrid = document.getElementById('catalogGrid');
     const catalogEmpty = document.getElementById('catalogEmpty');
     const catalogLoadMore = document.getElementById('catalogLoadMore');
@@ -436,9 +443,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const rateCaptchaVerify = document.getElementById('rateCaptchaVerify');
     const rateCaptchaError = document.getElementById('rateCaptchaError');
     let catalogCars = [];
-    let catalogFilter = { type: 'all', value: 'all' };
-    let catalogBrandQuery = '';
     let catalogLoading = false;
+    let catalogRequestVersion = 0;
+    let catalogCriteria = { source: 'all', sort: 'newest' };
     let rateCaptchaRetry = null;
     const catalogBatchSize = 4;
     const catalogMaxCars = 96;
@@ -476,95 +483,23 @@ window.addEventListener('DOMContentLoaded', () => {
         setCatalogMode(requestedMode === 'auction' ? 'auction' : 'popular');
     }
 
-    function carManufacturer(title) {
-        return String(title || '').trim().split(/\s+/)[0] || 'Другое';
-    }
-
-    function renderCatalogFilters(filters) {
-        if (!catalogFilterList) return;
-
-        const countries = Array.isArray(filters?.countries) ? filters.countries : [];
-        const manufacturers = Array.isArray(filters?.manufacturers) ? filters.manufacturers : [];
-        catalogFilterList.innerHTML = `
-            <button class="catalog-category ${catalogFilter.type === 'all' ? 'active' : ''}"
-                    data-filter-type="all" data-filter-value="all">Все</button>
-            ${countries.map(country => `
-                <button class="catalog-category ${catalogFilter.type === 'country' && catalogFilter.value === country ? 'active' : ''}"
-                        data-filter-type="country" data-filter-value="${escapeHtml(country)}">
-                    ${escapeHtml(country)}
-                </button>
-            `).join('')}
-            ${manufacturers.length ? `
-                <div class="catalog-filter-subtitle">
-                    <span>Марки автомобилей</span>
-                    <b>${manufacturers.length}</b>
-                </div>
-                <label class="catalog-brand-search">
-                    <span>Поиск марки</span>
-                    <input type="search" id="catalogBrandSearch" placeholder="Найти марку"
-                           value="${escapeHtml(catalogBrandQuery)}" autocomplete="off">
-                </label>
-                <div class="catalog-brand-list" id="catalogBrandList">
-                    ${manufacturers.map(manufacturer => `
-                        <button class="catalog-category ${catalogFilter.type === 'manufacturer' && catalogFilter.value === manufacturer ? 'active' : ''}"
-                                data-filter-type="manufacturer" data-filter-value="${escapeHtml(manufacturer)}">
-                            ${escapeHtml(manufacturer)}
-                        </button>
-                    `).join('')}
-                    <div class="catalog-brand-empty" id="catalogBrandEmpty" hidden>Марка не найдена</div>
-                </div>
-            ` : ''}
-        `;
-
-        catalogFilterList.querySelectorAll('.catalog-category').forEach(button => {
-            button.addEventListener('click', () => {
-                catalogFilterList.querySelectorAll('.catalog-category').forEach(item => item.classList.remove('active'));
-                button.classList.add('active');
-                catalogFilter = {
-                    type: button.dataset.filterType || 'all',
-                    value: button.dataset.filterValue || 'all'
-                };
-                renderCatalogCars(catalogCars);
-            });
-        });
-
-        const brandSearch = document.getElementById('catalogBrandSearch');
-        const brandList = document.getElementById('catalogBrandList');
-        const brandEmpty = document.getElementById('catalogBrandEmpty');
-        if (brandSearch && brandList) {
-            const filterBrands = () => {
-                catalogBrandQuery = brandSearch.value.trim();
-                const query = catalogBrandQuery.toLocaleLowerCase('ru');
-                const buttons = [...brandList.querySelectorAll('[data-filter-type="manufacturer"]')];
-                let visible = 0;
-                buttons.forEach(button => {
-                    const matches = !query || (button.dataset.filterValue || '').toLocaleLowerCase('ru').includes(query);
-                    button.hidden = !matches;
-                    if (matches) visible += 1;
-                });
-                if (brandEmpty) brandEmpty.hidden = visible > 0;
-            };
-            brandSearch.addEventListener('input', filterBrands);
-            filterBrands();
-        }
-    }
+    const catalogSourceMeta = {
+        japan: { country: 'Япония', currency: '¥' },
+        korea: { country: 'Корея', currency: '₩' },
+        china: { country: 'Китай', currency: '¥' }
+    };
 
     function renderCatalogCars(cars) {
         if (!catalogGrid) return;
 
-        const filtered = cars.filter(car => {
-            if (catalogFilter.type === 'country') {
-                return car.country === catalogFilter.value;
-            }
-            if (catalogFilter.type === 'manufacturer') {
-                return (car.manufacturer || carManufacturer(car.title)) === catalogFilter.value;
-            }
-            return true;
-        });
-
-        catalogGrid.innerHTML = filtered.map(car => {
+        catalogGrid.innerHTML = cars.map(car => {
             const image = car.imageUrl || '';
-            const info = [car.year, car.engine, car.lot ? `лот ${car.lot}` : ''].filter(Boolean).join(' · ');
+            const info = [
+                car.year,
+                car.engine,
+                car.mileage ? `${formatPrice(car.mileage)} км` : '',
+                car.lot ? `лот ${car.lot}` : ''
+            ].filter(Boolean).join(' · ');
             return `
                 <article class="catalog-car" data-country="${escapeHtml(car.country || '')}">
                     <div class="catalog-car-img">
@@ -595,15 +530,160 @@ window.addEventListener('DOMContentLoaded', () => {
         }).join('');
 
         if (catalogEmpty) {
-            catalogEmpty.hidden = filtered.length > 0;
+            catalogEmpty.hidden = cars.length > 0;
+        }
+        if (catalogResultCount) {
+            catalogResultCount.textContent = cars.length
+                ? `Загружено ${cars.length} предложений`
+                : 'По заданным параметрам ничего не найдено';
         }
     }
 
-    function catalogFilters() {
+    function setCatalogSelectOptions(select, values, placeholder, selected = '') {
+        if (!select) return;
+        select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>`
+            + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+        if (selected && values.includes(selected)) select.value = selected;
+    }
+
+    function catalogSources() {
+        const selected = catalogSource?.value || 'all';
+        return selected === 'all'
+            ? popularAuctionSources
+            : popularAuctionSources.filter(source => source.value === selected);
+    }
+
+    async function loadCatalogManufacturers() {
+        if (!catalogManufacturer) return;
+        const selected = catalogManufacturer.value;
+        catalogManufacturer.disabled = true;
+        setCatalogSelectOptions(catalogManufacturer, [], 'Загружаем марки...');
+        try {
+            const lists = await Promise.all(catalogSources().map(async source => {
+                const response = await fetch(`${API_BASE}/api/auctions/manufacturers?source=${source.value}`);
+                if (!response.ok) throw new Error('Марки временно недоступны');
+                return response.json();
+            }));
+            const values = [...new Set(lists.flat().filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            setCatalogSelectOptions(catalogManufacturer, values, 'Любая марка', selected);
+        } catch {
+            setCatalogSelectOptions(catalogManufacturer, [], 'Марки временно недоступны');
+        } finally {
+            catalogManufacturer.disabled = false;
+        }
+    }
+
+    async function loadCatalogModels(manufacturer) {
+        if (!catalogModel) return;
+        if (!manufacturer) {
+            setCatalogSelectOptions(catalogModel, [], 'Сначала выберите марку');
+            catalogModel.disabled = true;
+            return;
+        }
+        const selected = catalogModel.value;
+        catalogModel.disabled = true;
+        setCatalogSelectOptions(catalogModel, [], 'Загружаем модели...');
+        try {
+            const lists = await Promise.all(catalogSources().map(async source => {
+                const params = new URLSearchParams({ source: source.value, manufacturer });
+                const response = await fetch(`${API_BASE}/api/auctions/models?${params}`);
+                if (!response.ok) throw new Error('Модели временно недоступны');
+                return response.json();
+            }));
+            const values = [...new Set(lists.flat().filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            setCatalogSelectOptions(catalogModel, values, 'Любая модель', selected);
+            catalogModel.disabled = false;
+        } catch {
+            setCatalogSelectOptions(catalogModel, [], 'Модели временно недоступны');
+        }
+    }
+
+    function readCatalogCriteria() {
+        const formData = new FormData(catalogFilterForm);
+        const criteria = { source: formData.get('source') || 'all', sort: catalogSort?.value || 'newest' };
+        for (const name of ['query', 'manufacturer', 'model', 'yearFrom', 'yearTo', 'minMileage',
+            'maxMileage', 'engineFrom', 'engineTo', 'priceFrom', 'priceTo', 'transmission', 'drive']) {
+            const value = String(formData.get(name) || '').trim();
+            if (value) criteria[name] = value;
+        }
+        return criteria;
+    }
+
+    function catalogParams(source, offset) {
+        const params = new URLSearchParams({
+            source,
+            limit: String(catalogCriteria.source === 'all' ? catalogBatchSize : catalogBatchSize * 3),
+            offset: String(offset),
+            sort: catalogCriteria.sort
+        });
+        Object.entries(catalogCriteria).forEach(([name, value]) => {
+            if (!['source', 'sort'].includes(name) && value !== '') params.set(name, value);
+        });
+        return params;
+    }
+
+    function catalogCar(lot, source) {
+        const meta = catalogSourceMeta[source.value];
         return {
-            countries: [...new Set(catalogCars.map(car => car.country))],
-            manufacturers: [...new Set(catalogCars.map(car => car.manufacturer))].sort()
+            id: lot.id,
+            source: source.value,
+            country: meta.country,
+            manufacturer: lot.manufacturer || 'Другое',
+            title: [lot.manufacturer, lot.model].filter(Boolean).join(' ') || `Лот ${lot.id}`,
+            year: lot.year,
+            engine: lot.engine ? `${lot.engine} см³` : '',
+            engineValue: Number(String(lot.engine || '').replace(/\D/g, '')) || 0,
+            mileage: Number(lot.mileage) || 0,
+            lot: lot.lot,
+            auctionDate: lot.auctionDate || '',
+            price: Number(lot.price) || 0,
+            imageUrl: lot.imageUrl,
+            priceLabel: lot.price ? `${formatPrice(lot.price)} ${meta.currency}` : 'Расчёт по запросу',
+            description: [lot.auction, lot.grade].filter(Boolean).join(' · ')
         };
+    }
+
+    function sortCatalogCars(cars) {
+        const direction = catalogCriteria.sort.endsWith('Asc') ? 1 : -1;
+        const value = car => {
+            const missing = direction === 1 ? Number.MAX_SAFE_INTEGER : 0;
+            if (catalogCriteria.sort.startsWith('price')) return car.price || missing;
+            if (catalogCriteria.sort.startsWith('mileage')) return car.mileage || missing;
+            return car.year || 0;
+        };
+        cars.sort((a, b) => {
+            const difference = value(a) - value(b);
+            return difference ? difference * direction : String(b.id).localeCompare(String(a.id));
+        });
+        return cars;
+    }
+
+    function renderCatalogActiveFilters() {
+        if (!catalogActiveFilters) return;
+        const labels = {
+            query: 'Поиск', manufacturer: 'Марка', model: 'Модель', yearFrom: 'Год от', yearTo: 'Год до',
+            minMileage: 'Пробег от', maxMileage: 'Пробег до', engineFrom: 'Объём от', engineTo: 'Объём до',
+            priceFrom: 'Цена от', priceTo: 'Цена до', transmission: 'Коробка', drive: 'Привод'
+        };
+        const chips = [];
+        if (catalogCriteria.source !== 'all') {
+            chips.push({ name: 'source', text: catalogSourceMeta[catalogCriteria.source]?.country || catalogCriteria.source });
+        }
+        Object.entries(labels).forEach(([name, label]) => {
+            if (catalogCriteria[name]) chips.push({ name, text: `${label}: ${catalogCriteria[name]}` });
+        });
+        catalogActiveFilters.innerHTML = chips.map(chip => `
+            <button type="button" data-clear-filter="${chip.name}">${escapeHtml(chip.text)} <span>×</span></button>
+        `).join('');
+        catalogActiveFilters.hidden = !chips.length;
+    }
+
+    function resetCatalogPagination() {
+        popularAuctionSources.forEach(source => {
+            source.offset = 0;
+            source.done = false;
+        });
+        catalogCars = [];
     }
 
     function showRateCaptcha(fields, retry) {
@@ -617,10 +697,18 @@ window.addEventListener('DOMContentLoaded', () => {
         rateCaptchaAnswer?.focus();
     }
 
-    async function loadMoreCatalogCars() {
-        if (!catalogGrid || !catalogFilterList || catalogLoading || catalogCars.length >= catalogMaxCars) return;
+    async function loadMoreCatalogCars(reset = false) {
+        if (!catalogGrid || !catalogFilterForm || (!reset && (catalogLoading || catalogCars.length >= catalogMaxCars))) return;
 
-        const activeSources = popularAuctionSources.filter(source => !source.done);
+        if (reset) {
+            catalogRequestVersion += 1;
+            resetCatalogPagination();
+            catalogGrid.innerHTML = '<div class="catalog-loading">Ищем подходящие автомобили...</div>';
+            if (catalogEmpty) catalogEmpty.hidden = true;
+        }
+        const requestVersion = catalogRequestVersion;
+
+        const activeSources = catalogSources().filter(source => !source.done);
         if (!activeSources.length) {
             if (catalogLoadMore) catalogLoadMore.hidden = true;
             return;
@@ -634,9 +722,8 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const responses = await Promise.allSettled(activeSources.map(async source => {
-                const response = await fetch(
-                    `${API_BASE}/api/auctions/search?source=${source.value}&limit=${catalogBatchSize}&offset=${source.offset}`
-                );
+                const params = catalogParams(source.value, source.offset);
+                const response = await fetch(`${API_BASE}/api/auctions/search?${params}`);
                 if (!response.ok) {
                     const payload = await response.json().catch(() => ({}));
                     const error = new Error(payload.message || 'Источник временно недоступен');
@@ -646,23 +733,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
                 const payload = await response.json();
                 const items = Array.isArray(payload.items) ? payload.items : [];
-                source.offset += catalogBatchSize;
-                source.done = items.length < catalogBatchSize;
-                return items.map(lot => ({
-                    id: lot.id,
-                    source: source.value,
-                    country: source.country,
-                    manufacturer: lot.manufacturer || 'Другое',
-                    title: [lot.manufacturer, lot.model].filter(Boolean).join(' ') || `Лот ${lot.id}`,
-                    year: lot.year,
-                    engine: lot.engine ? `${lot.engine} см³` : '',
-                    lot: lot.lot,
-                    imageUrl: lot.imageUrl,
-                    priceLabel: lot.price ? `${formatPrice(lot.price)} ${source.currency}` : 'Расчёт по запросу',
-                    description: [lot.auction, lot.mileage ? `${formatPrice(lot.mileage)} км` : '']
-                        .filter(Boolean).join(' · ')
-                }));
+                const batchSize = catalogCriteria.source === 'all' ? catalogBatchSize : catalogBatchSize * 3;
+                source.offset += batchSize;
+                source.done = items.length < batchSize;
+                return items.map(lot => catalogCar(lot, source));
             }));
+
+            if (requestVersion !== catalogRequestVersion) return;
 
             const newCars = responses
                 .filter(result => result.status === 'fulfilled')
@@ -673,21 +750,23 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             const known = new Set(catalogCars.map(car => `${car.source}:${car.id}`));
             catalogCars.push(...newCars.filter(car => !known.has(`${car.source}:${car.id}`)));
-            if (!catalogCars.length) throw new Error('Нет доступных предложений');
-
-            renderCatalogFilters(catalogFilters());
+            sortCatalogCars(catalogCars);
             renderCatalogCars(catalogCars);
-        } catch {
+            renderCatalogActiveFilters();
+            if (!catalogCars.length && catalogEmpty) catalogEmpty.hidden = false;
+        } catch (error) {
             if (!catalogCars.length && catalogEmpty) {
                 catalogGrid.innerHTML = '';
-                catalogEmpty.textContent = 'Готовые варианты временно недоступны. Оставьте заявку, менеджер подберёт автомобиль вручную.';
+                catalogEmpty.textContent = error.message || 'Не удалось загрузить автомобили. Попробуйте изменить параметры.';
                 catalogEmpty.hidden = false;
+                if (catalogResultCount) catalogResultCount.textContent = 'Автомобили не загружены';
             }
         } finally {
+            if (requestVersion !== catalogRequestVersion) return;
             catalogLoading = false;
             if (catalogLoadMore) {
                 const hasMore = catalogCars.length < catalogMaxCars
-                    && popularAuctionSources.some(source => !source.done);
+                    && catalogSources().some(source => !source.done);
                 catalogLoadMore.hidden = !hasMore;
                 catalogLoadMore.disabled = false;
                 catalogLoadMore.textContent = hasMore ? 'Показать ещё' : 'Все предложения загружены';
@@ -696,9 +775,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadCatalogData() {
-        if (!catalogGrid || !catalogFilterList) return;
-        catalogGrid.innerHTML = '<div class="catalog-loading">Загружаем актуальные предложения...</div>';
-        loadMoreCatalogCars();
+        if (!catalogGrid || !catalogFilterForm) return;
+        catalogCriteria = readCatalogCriteria();
+        renderCatalogActiveFilters();
+        loadMoreCatalogCars(true);
     }
 
     if (
@@ -739,6 +819,63 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (catalogFilterForm) {
+        catalogFilterForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!catalogFilterForm.reportValidity()) return;
+            catalogCriteria = readCatalogCriteria();
+            loadMoreCatalogCars(true);
+        });
+    }
+
+    if (catalogSource) {
+        catalogSource.addEventListener('change', async () => {
+            if (catalogModel) {
+                catalogModel.value = '';
+                catalogModel.disabled = true;
+            }
+            await loadCatalogManufacturers();
+            loadCatalogModels(catalogManufacturer?.value || '');
+        });
+    }
+
+    if (catalogManufacturer) {
+        catalogManufacturer.addEventListener('change', () => loadCatalogModels(catalogManufacturer.value));
+    }
+
+    if (catalogSort) {
+        catalogSort.addEventListener('change', () => {
+            catalogCriteria = readCatalogCriteria();
+            loadMoreCatalogCars(true);
+        });
+    }
+
+    if (catalogFilterReset && catalogFilterForm) {
+        catalogFilterReset.addEventListener('click', async () => {
+            catalogFilterForm.reset();
+            if (catalogSort) catalogSort.value = 'newest';
+            await loadCatalogManufacturers();
+            loadCatalogModels('');
+            catalogCriteria = readCatalogCriteria();
+            loadMoreCatalogCars(true);
+        });
+    }
+
+    if (catalogActiveFilters && catalogFilterForm) {
+        catalogActiveFilters.addEventListener('click', async event => {
+            const button = event.target.closest('[data-clear-filter]');
+            if (!button) return;
+            const name = button.dataset.clearFilter;
+            const field = catalogFilterForm.elements.namedItem(name);
+            if (field) field.value = name === 'source' ? 'all' : '';
+            if (name === 'source') await loadCatalogManufacturers();
+            if (name === 'manufacturer') loadCatalogModels('');
+            catalogCriteria = readCatalogCriteria();
+            loadMoreCatalogCars(true);
+        });
+    }
+
+    loadCatalogManufacturers();
     loadCatalogData();
 
     if (catalogLoadMore) {

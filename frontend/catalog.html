@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог и аукционы — Олимп Авто</title>
     <link rel="icon" href="images/logo2.png">
-    <link rel="stylesheet" href="style.css?v=20260618-5">
+    <link rel="stylesheet" href="style.css?v=20260622-1">
 </head>
 <body>
 
@@ -81,18 +81,82 @@
             <section class="catalog-mode-panel active" id="popularCatalogPanel" data-catalog-panel="popular">
                 <div class="catalog-layout">
                     <aside class="catalog-sidebar">
-                        <h3>Авто в продаже</h3>
-                        <div class="catalog-filter-list" id="catalogFilterList">
-                            <button class="catalog-category active" data-filter-type="all" data-filter-value="all">Все</button>
+                        <div class="catalog-filter-head">
+                            <div>
+                                <span>Подбор автомобиля</span>
+                                <h3>Фильтры</h3>
+                            </div>
+                            <button type="button" id="catalogFilterReset">Сбросить</button>
                         </div>
-
-                        <div class="catalog-filter-group">
-                            <h4>Что дальше</h4>
-                            <p class="catalog-help">
-                                Здесь показана небольшая подборка актуальных лотов.
-                                Для точного поиска используйте вкладку аукционов.
-                            </p>
-                        </div>
+                        <form class="catalog-filter-form" id="catalogFilterForm">
+                            <label class="catalog-field catalog-field-wide">
+                                <span>Страна</span>
+                                <select name="source" id="catalogSource">
+                                    <option value="all">Все страны</option>
+                                    <option value="japan">Япония</option>
+                                    <option value="korea">Корея</option>
+                                    <option value="china">Китай</option>
+                                </select>
+                            </label>
+                            <label class="catalog-field catalog-field-wide">
+                                <span>Марка или модель</span>
+                                <input type="search" name="query" placeholder="Например, Toyota Prius" maxlength="80">
+                            </label>
+                            <label class="catalog-field catalog-field-wide">
+                                <span>Марка</span>
+                                <select name="manufacturer" id="catalogManufacturer">
+                                    <option value="">Любая марка</option>
+                                </select>
+                            </label>
+                            <label class="catalog-field catalog-field-wide">
+                                <span>Модель</span>
+                                <select name="model" id="catalogModel" disabled>
+                                    <option value="">Сначала выберите марку</option>
+                                </select>
+                            </label>
+                            <fieldset class="catalog-range catalog-field-wide">
+                                <legend>Год выпуска</legend>
+                                <label><span>От</span><input type="number" name="yearFrom" min="1980" max="2100" placeholder="2005"></label>
+                                <label><span>До</span><input type="number" name="yearTo" min="1980" max="2100" placeholder="2026"></label>
+                            </fieldset>
+                            <fieldset class="catalog-range catalog-field-wide">
+                                <legend>Пробег, км</legend>
+                                <label><span>От</span><input type="number" name="minMileage" min="0" placeholder="0"></label>
+                                <label><span>До</span><input type="number" name="maxMileage" min="1" placeholder="100 000"></label>
+                            </fieldset>
+                            <details class="catalog-advanced catalog-field-wide">
+                                <summary>Дополнительные параметры <span>+</span></summary>
+                                <div class="catalog-advanced-grid">
+                                    <fieldset class="catalog-range catalog-field-wide">
+                                        <legend>Объём двигателя, см³</legend>
+                                        <label><span>От</span><input type="number" name="engineFrom" min="0" placeholder="500"></label>
+                                        <label><span>До</span><input type="number" name="engineTo" min="1" placeholder="3000"></label>
+                                    </fieldset>
+                                    <fieldset class="catalog-range catalog-field-wide">
+                                        <legend>Цена в валюте страны</legend>
+                                        <label><span>От</span><input type="number" name="priceFrom" min="0" placeholder="100 000"></label>
+                                        <label><span>До</span><input type="number" name="priceTo" min="1" placeholder="Без ограничения"></label>
+                                    </fieldset>
+                                    <label class="catalog-field">
+                                        <span>Коробка</span>
+                                        <select name="transmission">
+                                            <option value="">Любая</option>
+                                            <option value="AT">Автомат</option>
+                                            <option value="MT">Механика</option>
+                                        </select>
+                                    </label>
+                                    <label class="catalog-field">
+                                        <span>Привод</span>
+                                        <select name="drive">
+                                            <option value="">Любой</option>
+                                            <option value="2wd">2WD</option>
+                                            <option value="4wd">4WD</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </details>
+                            <button class="catalog-filter-submit catalog-field-wide" type="submit">Показать автомобили</button>
+                        </form>
                     </aside>
 
                     <div class="catalog-content">
@@ -100,11 +164,22 @@
                             <div>
                                 <span class="catalog-kicker">Обновляется из базы аукционов</span>
                                 <h2>Актуальные предложения</h2>
+                                <p class="catalog-result-count" id="catalogResultCount">Загружаем автомобили...</p>
                             </div>
-                            <button class="catalog-switch-link" type="button" data-catalog-mode="auction">
-                                Перейти к поиску
-                            </button>
+                            <label class="catalog-sort-control">
+                                <span>Сортировка</span>
+                                <select id="catalogSort">
+                                    <option value="newest">Сначала новые</option>
+                                    <option value="priceAsc">Сначала дешевле</option>
+                                    <option value="priceDesc">Сначала дороже</option>
+                                    <option value="mileageAsc">Меньше пробег</option>
+                                    <option value="yearDesc">Год: новее</option>
+                                    <option value="yearAsc">Год: старше</option>
+                                </select>
+                            </label>
                         </div>
+
+                        <div class="catalog-active-filters" id="catalogActiveFilters" hidden></div>
 
                         <div class="catalog-grid" id="catalogGrid"></div>
 
@@ -372,7 +447,7 @@
 </footer>
 
 <script src="config.js"></script>
-<script src="scripts.js?v=20260618-4"></script>
+<script src="scripts.js?v=20260622-1"></script>
 
 </body>
 </html>
